@@ -623,27 +623,257 @@ class Trie:
           {
             title: 'Subsets',
             difficulty: 'Medium',
-            question: 'Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets.',
+            question: 'Generate all possible subsets of a given set of distinct integers.',
             hint: 'Use backtracking to generate all possible combinations.',
-            oneLiner: 'Build all possible combinations by choosing whether to include each element.',
-            threeLiner: 'We explore making two choices for each number: include it or skip it.\nWe use recursion to try all possible combinations.\nThis builds a solution by adding one element at a time and backtracking.',
-            mnemonic: 'The "Team Builder" - like forming all possible teams from a group of players.',
+            oneLiner: 'Use backtracking to include or exclude each number.',
+            threeLiner: 'We pick numbers one by one.\nEach time, we decide to keep it or skip it.\nThat gives us all possible combinations.',
+            mnemonic: '"Start with empty list" → res = [[]]\n"Try adding" → dfs(index + 1, path + [nums[i]])\n"Try skipping" → dfs(index + 1, path)',
             code: `def subsets(nums):
     result = []
-    
-    def backtrack(start, current):
-        result.append(current[:])
-        
+    def backtrack(start, path):
+        result.append(path)
         for i in range(start, len(nums)):
-            current.append(nums[i])
-            backtrack(i + 1, current)
-            current.pop()
-    
+            backtrack(i + 1, path + [nums[i]])
     backtrack(0, [])
     return result
 
-# Time Complexity: O(n * 2^n)
-# Space Complexity: O(n) - depth of the recursion stack`
+# Time Complexity: O(2^N)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Combination Sum',
+            difficulty: 'Medium',
+            question: 'Find all unique combinations of candidates where the chosen numbers sum to a target. Each number in candidates may be used unlimited times.',
+            hint: 'Use a recursive approach to try all combinations, with an option to reuse the same number.',
+            oneLiner: 'Use DFS to try combinations, reusing the same number.',
+            threeLiner: 'We keep adding numbers until we hit the target.\nWe can use the same number again.\nIf it\'s too much, we stop and go back.',
+            mnemonic: '"Base case" → if target == 0: add path\n"Too big" → if target < 0: return\n"Try again" → dfs(i, path + [candidates[i]], target - candidates[i])',
+            code: `def combinationSum(candidates, target):
+    result = []
+    def backtrack(start, target, path):
+        if target == 0:
+            result.append(path)
+            return
+        for i in range(start, len(candidates)):
+            if candidates[i] > target:
+                continue
+            backtrack(i, target - candidates[i], path + [candidates[i]])
+    candidates.sort()
+    backtrack(0, target, [])
+    return result
+
+# Time Complexity: O(N^(T/M)) where T is target and M is minimum value 
+# Space Complexity: O(T/M)`
+          },
+          {
+            title: 'Combination Sum II',
+            difficulty: 'Medium',
+            question: 'Find all unique combinations in candidates where the chosen numbers sum to target. Each number in candidates may only be used once. The solution set must not contain duplicate combinations.',
+            hint: 'Sort the input array to handle duplicates and use backtracking to find the combinations.',
+            oneLiner: 'Like Combination Sum but skip duplicates and don\'t reuse elements.',
+            threeLiner: 'We can\'t use the same number again.\nWe also skip duplicates to avoid repeat combos.\nWe keep trying until the sum matches the target.',
+            mnemonic: '"Sort first" → candidates.sort()\n"Skip duplicates" → if i > start and candidates[i] == candidates[i - 1]: continue\n"DFS without reuse" → dfs(i + 1, path + [candidates[i]], target - candidates[i])',
+            code: `def combinationSum2(candidates, target):
+    result = []
+    candidates.sort()
+    def backtrack(start, target, path):
+        if target == 0:
+            result.append(path)
+            return
+        prev = -1
+        for i in range(start, len(candidates)):
+            if candidates[i] == prev:
+                continue
+            if candidates[i] > target:
+                break
+            backtrack(i + 1, target - candidates[i], path + [candidates[i]])
+            prev = candidates[i]
+    backtrack(0, target, [])
+    return result
+
+# Time Complexity: O(2^N)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Permutations',
+            difficulty: 'Medium',
+            question: 'Return all possible permutations of a list of distinct integers.',
+            hint: 'Use backtracking to build the permutations by choosing one element at a time.',
+            oneLiner: 'Use backtracking to build all possible orders.',
+            threeLiner: 'We make all different orders of the numbers.\nWe pick one at a time and don\'t repeat it.\nWhen the list is full, we save it.',
+            mnemonic: '"Track used" → if num in used: continue\n"Choose number" → path.append(num)\n"Backtrack" → path.pop() and used.remove(num)',
+            code: `def permute(nums):
+    result = []
+    def backtrack(path, options):
+        if not options:
+            result.append(path)
+            return
+        for i in range(len(options)):
+            backtrack(path + [options[i]], options[:i] + options[i+1:])
+    backtrack([], nums)
+    return result
+
+# Time Complexity: O(N!)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Subsets II',
+            difficulty: 'Medium',
+            question: 'Return all possible subsets of a list of integers that might contain duplicates. The solution set must not contain duplicate subsets.',
+            hint: 'Sort the input to handle duplicates and use backtracking to generate subsets.',
+            oneLiner: 'Backtracking with duplicate skip using sorted input.',
+            threeLiner: 'Like normal subsets, but now we skip duplicates.\nWe sort the list so we can spot repeats.\nWe only use the first time a number shows up at a level.',
+            mnemonic: '"Sort input" → nums.sort()\n"Skip repeat at level" → if i > start and nums[i] == nums[i - 1]: continue\n"DFS normally" → dfs(i + 1, path + [nums[i]])',
+            code: `def subsetsWithDup(nums):
+    result = []
+    nums.sort()
+    def backtrack(start, path):
+        result.append(path)
+        for i in range(start, len(nums)):
+            if i > start and nums[i] == nums[i - 1]:
+                continue
+            backtrack(i + 1, path + [nums[i]])
+    backtrack(0, [])
+    return result
+
+# Time Complexity: O(2^N)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Word Search',
+            difficulty: 'Medium',
+            question: 'Given an m x n board and a word, find if the word exists in the grid. The word can be constructed from letters of sequentially adjacent cells.',
+            hint: 'Use backtracking to explore all possible paths starting from each cell.',
+            oneLiner: 'Backtrack through board cells matching word letters.',
+            threeLiner: 'We try to find each letter one by one.\nWe can only move up/down/left/right.\nIf it works, we return true!',
+            mnemonic: '"Check match" → if board[i][j] != word[pos]: return\n"Mark visited" → board[i][j] = \'#\'\n"Unmark (backtrack)" → board[i][j] = original_letter',
+            code: `def exist(board, word):
+    rows, cols = len(board), len(board[0])
+    def backtrack(r, c, index):
+        if index == len(word):
+            return True
+        if r < 0 or r >= rows or c < 0 or c >= cols or board[r][c] != word[index]:
+            return False
+        temp, board[r][c] = board[r][c], '#'
+        found = (backtrack(r+1, c, index+1) or
+                 backtrack(r-1, c, index+1) or
+                 backtrack(r, c+1, index+1) or
+                 backtrack(r, c-1, index+1))
+        board[r][c] = temp
+        return found
+    for r in range(rows):
+        for c in range(cols):
+            if backtrack(r, c, 0):
+                return True
+    return False
+
+# Time Complexity: O(M * N * 4^L) where L is word length
+# Space Complexity: O(L)`
+          },
+          {
+            title: 'Palindrome Partitioning',
+            difficulty: 'Medium',
+            question: 'Partition a string such that every substring is a palindrome. Return all possible palindrome partitioning of the string.',
+            hint: 'Use backtracking to explore all possible ways to cut the string, checking if each piece is a palindrome.',
+            oneLiner: 'Use backtracking to cut the string at every palindrome point.',
+            threeLiner: 'We break the string into pieces.\nOnly cut when the piece is a palindrome.\nWe keep cutting until the whole string is split.',
+            mnemonic: '"Check palindrome" → if s[l:r+1] == s[l:r+1][::-1]\n"Cut and continue" → dfs(end + 1, path + [s[start:end+1]])\n"Add to result" → if start == len(s): res.append(path)',
+            code: `def partition(s):
+    result = []
+    def is_palindrome(sub):
+        return sub == sub[::-1]
+    def backtrack(start, path):
+        if start == len(s):
+            result.append(path)
+            return
+        for end in range(start + 1, len(s) + 1):
+            if is_palindrome(s[start:end]):
+                backtrack(end, path + [s[start:end]])
+    backtrack(0, [])
+    return result
+
+# Time Complexity: O(2^N)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Letter Combinations of a Phone Number',
+            difficulty: 'Medium',
+            question: 'Given a string containing digits from 2-9 inclusive, return all possible letter combinations that the number could represent.',
+            hint: 'Use a mapping of digits to letters and backtracking to generate all combinations.',
+            oneLiner: 'Backtrack all digit-letter mappings like a tree.',
+            threeLiner: 'Each number maps to letters.\nWe pick one letter per number.\nWe try every combination possible.',
+            mnemonic: '"Map digits" → digit_map = {\'2\': \'abc\', ...}\n"For each digit" → for letter in digit_map[digit]:\n"Backtrack" → dfs(index + 1, path + letter)',
+            code: `def letterCombinations(digits):
+    if not digits:
+        return []
+    phone = {
+        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+    }
+    result = []
+    def backtrack(index, path):
+        if index == len(digits):
+            result.append(path)
+            return
+        for char in phone[digits[index]]:
+            backtrack(index + 1, path + char)
+    backtrack(0, '')
+    return result
+
+# Time Complexity: O(4^N) where N is number of digits
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'N-Queens',
+            difficulty: 'Hard',
+            question: 'The n-queens puzzle is the problem of placing n queens on an n×n chessboard such that no two queens attack each other. Return all distinct solutions.',
+            hint: 'Place queens row by row and check if it\'s safe to place a queen at each position.',
+            oneLiner: 'Place queens row by row, checking for safe spots.',
+            threeLiner: 'We try to put queens one row at a time.\nWe make sure they don\'t attack each other.\nIf it works, we save the board setup.',
+            mnemonic: '"Loop columns" → for col in range(n):\n"Check safe" → if col not in cols and row+col not in diag1 and row-col not in diag2\n"Place & recurse" → dfs(row + 1) and backtrack positions',
+            code: `def solveNQueens(n):
+    result = []
+    
+    # Initialize the chessboard
+    chessboard = [['.' for _ in range(n)] for _ in range(n)]
+    
+    # Sets to track occupied columns and diagonals
+    cols = set()
+    diag1 = set()  # r + c
+    diag2 = set()  # r - c
+    
+    def backtrack(r):
+        if r == n:
+            # When we've placed all n queens successfully
+            board = [''.join(row) for row in chessboard]
+            result.append(board)
+            return
+        
+        for c in range(n):
+            # Check if current position is under attack
+            if c in cols or (r + c) in diag1 or (r - c) in diag2:
+                continue
+                
+            # Place the queen
+            cols.add(c)
+            diag1.add(r + c)
+            diag2.add(r - c)
+            chessboard[r][c] = 'Q'
+            
+            # Move to the next row
+            backtrack(r + 1)
+            
+            # Backtrack
+            cols.remove(c)
+            diag1.remove(r + c)
+            diag2.remove(r - c)
+            chessboard[r][c] = '.'
+    
+    backtrack(0)
+    return result
+
+# Time Complexity: O(N!)
+# Space Complexity: O(N)`
           }
         ],
         heap: [
