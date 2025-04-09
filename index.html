@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode Flashcards</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .flip-card-container {
+      perspective: 1000px;
+    }
+    .flip-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+    .flip-card-front {
+      background-color: white;
+      z-index: 2;
+    }
+    .flip-card-back {
+      background-color: #2d3748;
+      color: white;
+      transform: rotateY(180deg);
+    }
+    .tab-content {
+      height: calc(100% - 120px);
+      overflow-y: auto;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+        .flip-card-container {
+      perspective: 1000px;
+      width: 100%;
+      max-width: 600px;
+      height: 600px;
+      margin: 0 auto;
+    }
+    .flip-card-front, .flip-card-back {
+      border: 1px solid #ccc;
+      min-height: 500px; /* Ensure minimum height */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <header class="bg-gray-800 text-white shadow-md">
+    <div class="container mx-auto py-4 px-6">
+      <h1 class="text-2xl font-bold">LeetCode Flashcards</h1>
+    </div>
+  </header>
+  <main class="flex-grow container mx-auto p-6">
+    <div id="topic-section">
+      <h2 class="text-xl font-semibold mb-6">Select a Topic</h2>
+      <div id="topic-grid" class="grid-container"></div>
+    </div>
+    <div id="flashcard-section" class="hidden">
+      <div class="mb-6">
+        <button id="back-button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded">Back to Topics</button>
+        <h2 id="current-topic" class="text-xl font-semibold mt-4"></h2>
+        <div class="flex justify-between items-center mt-2">
+          <p id="problem-counter" class="text-gray-600"></p>
+          <div class="flex gap-2">
+            <button id="prev-button" class="bg-gray-200 px-3 py-1 rounded disabled:opacity-50">Previous</button> <button id="next-button" class="bg-gray-200 px-3 py-1 rounded disabled:opacity-50">Next</button>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card-container w-full max-w-3xl aspect-square mx-auto">
+        <div id="flashcard" class="flip-card">
+          <div class="flip-card-front rounded-xl shadow-lg">
+            <div class="p-5 bg-blue-600 text-white flex justify-between items-center">
+              <h3 id="card-title" class="font-bold text-xl"></h3><span id="card-difficulty" class="px-2 py-1 rounded-full text-xs font-semibold"></span>
+            </div>
+            <div class="border-b">
+              <div class="flex">
+                <button id="question-tab" class="px-4 py-2 border-b-2 border-blue-500 text-blue-600">Question</button> <button id="hint-tab" class="px-4 py-2 border-b-2 border-transparent">Hint</button>
+              </div>
+            </div>
+            <div class="tab-content p-5">
+              <div id="question-content" class="text-gray-700"></div>
+              <div id="hint-content" class="text-gray-700 hidden"></div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-sm">
+              Click to flip
+            </div>
+          </div>
+          <div class="flip-card-back rounded-xl shadow-lg">
+            <div class="p-5 bg-gray-800 text-white flex justify-between items-center">
+              <h3 id="card-title-back" class="font-bold text-xl"></h3>
+            </div>
+            <div class="border-b border-gray-600">
+              <div class="flex">
+                <button id="mnemonic-tab" class="px-4 py-2 border-b-2 border-blue-300 text-blue-300">Mnemonic</button> <button id="code-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Code</button>
+              </div>
+            </div>
+            <div class="tab-content p-5">
+              <div id="mnemonic-content" class="text-white"></div>
+              <div id="code-content" class="hidden">
+                <pre id="code-block" class="font-mono text-sm bg-gray-900 p-4 rounded text-white overflow-auto"></pre>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-400 text-sm">
+              Click to flip back
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="bg-gray-800 text-white p-4 mt-8">
+    <div class="container mx-auto text-center text-sm">
+      <p>© 2025 LeetCode Flashcards - Master Algorithms & Data Structures</p>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Topics data
+      const topics = [
+        { id: 'arrays', name: 'Arrays and Hashing' },
+        { id: 'twopointers', name: 'Two Pointers' },
+        { id: 'stack', name: 'Stack' },
+        { id: 'binarysearch', name: 'Binary Search' },
+        { id: 'slidingwindow', name: 'Sliding Window' },
+        { id: 'linkedlist', name: 'Linked List' },
+        { id: 'trees', name: 'Trees' },
+        { id: 'tries', name: 'Tries' },
+        { id: 'backtracking', name: 'Backtracking' },
+        { id: 'heap', name: 'Heap/Priority Queue' },
+        { id: 'intervals', name: 'Intervals' },
+        { id: 'greedy', name: 'Greedy' },
+        { id: 'advancedgraphs', name: 'Advanced Graphs' },
+        { id: 'graphs', name: 'Graphs' },
+        { id: 'dp1d', name: '1-D Dynamic Programming' },
+        { id: 'dp2d', name: '2-D Dynamic Programming' },
+        { id: 'bitmanipulation', name: 'Bit Manipulation' },
+        { id: 'mathgeometry', name: 'Math & Geometry' },
+      ];
+
+      // Sample problems
+  // Problems data
+  const problems = {
+  arrays: [
+    {
+      title: 'Contains Duplicate',
+      difficulty: 'Easy',
+      question: 'Given an integer array nums, return true if any value appears more than once in the array, otherwise return false.',
+      hint: 'Think about using a data structure that allows for O(1) lookups.',
+      mnemonic: 'The "Club Entry Check" - like a bouncer checking if someone is already inside the club (HashSet).',
+      code: `def containsDuplicate(nums):
+    seen = set()
+    for num in nums:
+        if num in seen:
+            return True
+        seen.add(num)
+    return False
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(n)`
+    },
+    {
+      title: 'Valid Anagram',
+      difficulty: 'Easy',
+      question: 'Given two strings s and t, return true if t is an anagram of s, and false otherwise. An anagram is a word formed by rearranging the letters of another word.',
+      hint: 'Count the occurrences of each character in both strings.',
+      mnemonic: 'The "Letter Counter" - like counting and comparing ingredients for two recipes.',
+      code: `def isAnagram(s, t):
+    if len(s) != len(t):
+        return False
+        
+    char_count = {}
+    
+    # Count characters in s
+    for char in s:
+        char_count[char] = char_count.get(char, 0) + 1
+        
+    # Decrement counts for t
+    for char in t:
+        if char not in char_count or char_count[char] == 0:
+            return False
+        char_count[char] -= 1
+        
+    return True
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1) - as there are only 26 possible lowercase letters`
+    }
+  ],
+  twopointers: [
+    {
+      title: 'Valid Palindrome',
+      difficulty: 'Easy',
+      question: 'A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.',
+      hint: 'Use two pointers: one starting from the beginning and one from the end.',
+      mnemonic: 'The "Mirror Check" - like looking at a word from both sides to see if they match.',
+      code: `def isPalindrome(s):
+    left, right = 0, len(s) - 1
+    
+    while left < right:
+        # Skip non-alphanumeric characters
+        while left < right and not s[left].isalnum():
+            left += 1
+        while left < right and not s[right].isalnum():
+            right -= 1
+            
+        # Compare characters (case-insensitive)
+        if s[left].lower() != s[right].lower():
+            return False
+            
+        left += 1
+        right -= 1
+        
+    return True
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  stack: [
+    {
+      title: 'Valid Parentheses',
+      difficulty: 'Easy',
+      question: 'Given a string s containing just the characters \'(\', \')\', \'{\', \'}\', \'[\' and \']\', determine if the input string is valid.',
+      hint: 'Use a stack to keep track of opening brackets.',
+      mnemonic: 'The "Bracket Matcher" - like pairing left and right gloves.',
+      code: `def isValid(s):
+    stack = []
+    mapping = {")": "(", "}": "{", "]": "["}
+    
+    for char in s:
+        if char in mapping:  # closing bracket
+            top_element = stack.pop() if stack else '#'
+            if mapping[char] != top_element:
+                return False
+        else:  # opening bracket
+            stack.append(char)
+    
+    return not stack  # stack should be empty at the end
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(n)`
+    }
+  ],
+  binarysearch: [
+    {
+      title: 'Binary Search',
+      difficulty: 'Easy',
+      question: 'Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.',
+      hint: 'Use the binary search algorithm by repeatedly dividing the search interval in half.',
+      mnemonic: 'The "Phone Book Search" - like finding a name in a phone book by dividing pages.',
+      code: `def search(nums, target):
+    left, right = 0, len(nums) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if nums[mid] == target:
+            return mid
+        
+        if nums[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return -1  # Target not found
+
+  # Time Complexity: O(log n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  slidingwindow: [
+    {
+      title: 'Best Time to Buy and Sell Stock',
+      difficulty: 'Easy',
+      question: 'You are given an array prices where prices[i] is the price of a given stock on the ith day. You want to maximize your profit by choosing a single day to buy and a single day to sell.',
+      hint: 'Keep track of the minimum price you\'ve seen so far, and calculate the maximum profit as you go through the array.',
+      mnemonic: 'The "Bargain Hunter" - like buying at lowest price and selling at highest after.',
+      code: `def maxProfit(prices):
+    if not prices:
+        return 0
+        
+    max_profit = 0
+    min_price = float('inf')
+    
+    for price in prices:
+        min_price = min(min_price, price)
+        current_profit = price - min_price
+        max_profit = max(max_profit, current_profit)
+    
+    return max_profit
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  linkedlist: [
+    {
+      title: 'Reverse Linked List',
+      difficulty: 'Easy',
+      question: 'Given the head of a singly linked list, reverse the list, and return the reversed list.',
+      hint: 'Use three pointers to track the previous, current, and next nodes.',
+      mnemonic: 'The "Arrow Flipper" - like changing the direction of all arrows in a path.',
+      code: `def reverseList(head):
+    prev = None
+    current = head
+    
+    while current:
+        next_temp = current.next
+        current.next = prev
+        prev = current
+        current = next_temp
+        
+    return prev
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  trees: [
+    {
+      title: 'Maximum Depth of Binary Tree',
+      difficulty: 'Easy',
+      question: 'Given the root of a binary tree, return its maximum depth. A binary tree\'s maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.',
+      hint: 'Use recursion to find the depth of the left and right subtrees.',
+      mnemonic: 'The "Tree Height Finder" - like measuring the height of a tree.',
+      code: `def maxDepth(root):
+    if not root:
+        return 0
+        
+    left_depth = maxDepth(root.left)
+    right_depth = maxDepth(root.right)
+    
+    return max(left_depth, right_depth) + 1
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(h) where h is the height of the tree`
+    }
+  ],
+  tries: [
+    {
+      title: 'Implement Trie (Prefix Tree)',
+      difficulty: 'Medium',
+      question: 'Implement a trie with insert, search, and startsWith methods.',
+      hint: 'Use a tree structure where each node has a dictionary of children.',
+      mnemonic: 'The "Word Explorer" - like navigating a dictionary by following letter paths.',
+      code: `class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+  class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+        
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end_of_word = True
+        
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end_of_word
+        
+    def startsWith(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+
+  # Time Complexity: O(m) for all operations, where m is the length of the word
+  # Space Complexity: O(m * n) where n is the number of words`
+    }
+  ],
+  backtracking: [
+    {
+      title: 'Subsets',
+      difficulty: 'Medium',
+      question: 'Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets.',
+      hint: 'Use backtracking to generate all possible combinations.',
+      mnemonic: 'The "Team Builder" - like forming all possible teams from a group of players.',
+      code: `def subsets(nums):
+    result = []
+    
+    def backtrack(start, current):
+        result.append(current[:])
+        
+        for i in range(start, len(nums)):
+            current.append(nums[i])
+            backtrack(i + 1, current)
+            current.pop()
+    
+    backtrack(0, [])
+    return result
+
+  # Time Complexity: O(n * 2^n)
+  # Space Complexity: O(n) - depth of the recursion stack`
+    }
+  ],
+  heap: [
+    {
+      title: 'Kth Largest Element in an Array',
+      difficulty: 'Medium',
+      question: 'Given an integer array nums and an integer k, return the kth largest element in the array.',
+      hint: 'Use a min-heap of size k to keep track of the k largest elements.',
+      mnemonic: 'The "Top K Tracker" - like maintaining a leaderboard of the k highest scores.',
+      code: `import heapq
+
+  def findKthLargest(nums, k):
+    min_heap = []
+    
+    for num in nums:
+        if len(min_heap) < k:
+            heapq.heappush(min_heap, num)
+        elif num > min_heap[0]:
+            heapq.heappop(min_heap)
+            heapq.heappush(min_heap, num)
+    
+    return min_heap[0]
+
+  # Time Complexity: O(n log k)
+  # Space Complexity: O(k)`
+    }
+  ],
+  intervals: [
+    {
+      title: 'Merge Intervals',
+      difficulty: 'Medium',
+      question: 'Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals.',
+      hint: 'Sort the intervals by their start time, then merge overlapping intervals.',
+      mnemonic: 'The "Appointment Combiner" - like merging overlapping meetings in a calendar.',
+      code: `def merge(intervals):
+    if not intervals:
+        return []
+    
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+    
+    merged = [intervals[0]]
+    
+    for i in range(1, len(intervals)):
+        current = intervals[i]
+        previous = merged[-1]
+        
+        # If current interval overlaps with previous
+        if current[0] <= previous[1]:
+            # Merge by updating end time of previous
+            previous[1] = max(previous[1], current[1])
+        else:
+            # No overlap, add current interval
+            merged.append(current)
+    
+    return merged
+
+  # Time Complexity: O(n log n) due to sorting
+  # Space Complexity: O(n) for the output array`
+    }
+  ],
+  greedy: [
+    {
+      title: 'Jump Game',
+      difficulty: 'Medium',
+      question: 'You are given an integer array nums. You are initially positioned at the first index of the array and each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index.',
+      hint: 'Keep track of the furthest position you can reach.',
+      mnemonic: 'The "Furthest Reach Tracker" - like marking the furthest point you can reach at any step.',
+      code: `def canJump(nums):
+    max_reach = 0
+    
+    for i, jump in enumerate(nums):
+        # If we can't reach the current position, we can't go further
+        if i > max_reach:
+            return False
+            
+        # Update the furthest we can reach
+        max_reach = max(max_reach, i + jump)
+        
+        # If we can reach the end, return early
+        if max_reach >= len(nums) - 1:
+            return True
+    
+    return True
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  advancedgraphs: [
+    {
+      title: 'Network Delay Time',
+      difficulty: 'Medium',
+      question: 'You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges where times[i] = (ui, vi, wi) means node ui to node vi takes wi time. Return the minimum time it takes for all the n nodes to receive the signal, or -1 if it is impossible.',
+      hint: 'Use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.',
+      mnemonic: 'The "Signal Tracker" - like measuring how long it takes for a signal to reach all nodes in a network.',
+      code: `import heapq
+
+  def networkDelayTime(times, n, k):
+    # Build graph
+    graph = {}
+    for u, v, w in times:
+        if u not in graph:
+            graph[u] = []
+        graph[u].append((v, w))
+    
+    # Min heap to track shortest distances
+    heap = [(0, k)]  # (time, node)
+    visited = set()
+    
+    # Dijkstra's algorithm
+    while heap:
+        time, node = heapq.heappop(heap)
+        
+        if node in visited:
+            continue
+            
+        visited.add(node)
+        
+        # If all nodes are visited, return time
+        if len(visited) == n:
+            return time
+        
+        # Add neighbors to heap
+        if node in graph:
+            for neighbor, weight in graph[node]:
+                if neighbor not in visited:
+                    heapq.heappush(heap, (time + weight, neighbor))
+    
+    # If not all nodes can be reached
+    return -1
+
+  # Time Complexity: O(E log V) where E is the number of edges and V is the number of nodes
+  # Space Complexity: O(E + V)`
+    }
+  ],
+  graphs: [
+    {
+      title: 'Number of Islands',
+      difficulty: 'Medium',
+      question: 'Given an m x n 2D binary grid grid which represents a map of \'1\'s (land) and \'0\'s (water), return the number of islands.',
+      hint: 'Use DFS or BFS to explore all connected land cells, marking them as visited.',
+      mnemonic: 'The "Land Explorer" - like discovering and marking all connected pieces of land.',
+      code: `def numIslands(grid):
+    if not grid:
+        return 0
+        
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    
+    def dfs(r, c):
+        if r < 0 or r >= rows or c < 0 or c >= cols or grid[r][c] == '0':
+            return
+            
+        # Mark as visited
+        grid[r][c] = '0'
+        
+        # Explore all 4 directions
+        dfs(r + 1, c)
+        dfs(r - 1, c)
+        dfs(r, c + 1)
+        dfs(r, c - 1)
+    
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                dfs(r, c)
+    
+    return count
+
+  # Time Complexity: O(m * n) where m and n are the dimensions of the grid
+  # Space Complexity: O(m * n) for the recursion stack in worst case`
+    }
+  ],
+  dp1d: [
+    {
+      title: 'Climbing Stairs',
+      difficulty: 'Easy',
+      question: 'You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?',
+      hint: 'The number of ways to reach step n is the sum of ways to reach steps n-1 and n-2.',
+      mnemonic: 'The "Fibonacci Climber" - like calculating Fibonacci numbers for each step.',
+      code: `def climbStairs(n):
+    if n <= 2:
+        return n
+        
+    # Initialize first two steps
+    prev1, prev2 = 1, 2
+    
+    # Calculate ways for subsequent steps
+    for i in range(3, n + 1):
+        current = prev1 + prev2
+        prev1, prev2 = prev2, current
+    
+    return prev2
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  dp2d: [
+    {
+      title: 'Unique Paths',
+      difficulty: 'Medium',
+      question: 'A robot is located at the top-left corner of a m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid. How many possible unique paths are there?',
+      hint: 'The number of ways to reach a cell is the sum of ways to reach the cell above it and the cell to its left.',
+      mnemonic: 'The "Path Counter" - like counting all possible routes on a map.',
+      code: `def uniquePaths(m, n):
+    # Create a 2D DP table
+    dp = [[1 for _ in range(n)] for _ in range(m)]
+    
+    # Fill the DP table
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    
+    return dp[m-1][n-1]
+
+  # Time Complexity: O(m * n)
+  # Space Complexity: O(m * n)`
+    }
+  ],
+  bitmanipulation: [
+    {
+      title: 'Single Number',
+      difficulty: 'Easy',
+      question: 'Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.',
+      hint: 'Think about using bitwise operations. XOR has an interesting property: n ^ n = 0.',
+      mnemonic: 'The "XOR Eliminator" - like items canceling out in pairs, leaving the odd one out.',
+      code: `def singleNumber(nums):
+    result = 0
+    for num in nums:
+        result ^= num
+    return result
+
+  # Time Complexity: O(n)
+  # Space Complexity: O(1)`
+    }
+  ],
+  mathgeometry: [
+    {
+      title: 'Happy Number',
+      difficulty: 'Easy',
+      question: 'Write an algorithm to determine if a number n is happy. A happy number is a number defined by the following process: Starting with any positive integer, replace the number by the sum of the squares of its digits, and repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.',
+      hint: 'Use a hash set to detect cycles.',
+      mnemonic: 'The "Square and Sum Cycle Detector" - like tracking a process that either reaches happiness or cycles endlessly.',
+      code: `def isHappy(n):
+    seen = set()
+    
+    while n != 1 and n not in seen:
+        seen.add(n)
+        n = sum(int(digit) ** 2 for digit in str(n))
+    
+    return n == 1
+
+  # Time Complexity: O(log n)
+  # Space Complexity: O(log n)`
+    }
+  ]
+  };
+
+      // DOM elements
+      const topicSection = document.getElementById('topic-section');
+      const topicGrid = document.getElementById('topic-grid');
+      const flashcardSection = document.getElementById('flashcard-section');
+      const backButton = document.getElementById('back-button');
+      const currentTopic = document.getElementById('current-topic');
+      const problemCounter = document.getElementById('problem-counter');
+      const prevButton = document.getElementById('prev-button');
+      const nextButton = document.getElementById('next-button');
+      const flashcard = document.getElementById('flashcard');
+      
+      // State variables
+      let selectedTopicId = null;
+      let currentProblemIndex = 0;
+
+      // Populate topics
+      function populateTopics() {
+        console.log("Populating topics...");
+        topicGrid.innerHTML = '';
+        
+        topics.forEach(topic => {
+          const problemCount = problems[topic.id] ? problems[topic.id].length : 0;
+          const status = problemCount > 0 ? `${problemCount} problems` : 'Coming soon';
+          
+          const card = document.createElement('div');
+          card.className = 'bg-white hover:bg-blue-50 border border-gray-200 rounded-lg p-4 shadow-sm transition-colors';
+          card.innerHTML = `
+            <h3 class="font-medium text-gray-900">${topic.name}</h3>
+            <p class="text-gray-500 text-sm mt-1">${status}</p>
+          `;
+          
+          if (problemCount > 0) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => selectTopic(topic.id));
+          } else {
+            card.classList.add('opacity-60');
+            card.style.cursor = 'not-allowed';
+          }
+          
+          topicGrid.appendChild(card);
+        });
+      }
+
+      // Select a topic
+      function selectTopic(topicId) {
+        selectedTopicId = topicId;
+        currentProblemIndex = 0;
+        
+        topicSection.classList.add('hidden');
+        flashcardSection.classList.remove('hidden');
+        
+        const topic = topics.find(t => t.id === topicId);
+        currentTopic.textContent = topic.name;
+        
+        loadProblem();
+      }
+
+      // Load current problem
+      function loadProblem() {
+        console.log("Loading problem...");
+        const currentProblems = problems[selectedTopicId];
+        console.log("Current problems:", currentProblems);
+        const problem = currentProblems[currentProblemIndex];
+        console.log("Current problem:", problem);
+        
+        // Update counter and navigation
+        problemCounter.textContent = `Problem ${currentProblemIndex + 1} of ${currentProblems.length}`;
+        prevButton.disabled = currentProblemIndex === 0;
+        nextButton.disabled = currentProblemIndex === currentProblems.length - 1;
+        
+        // Reset card state
+        flashcard.classList.remove('flipped');
+        
+        // Update front of card
+        document.getElementById('card-title').textContent = problem.title;
+        document.getElementById('card-title-back').textContent = `${problem.title} - Solution`;
+        
+        // Set difficulty badge
+        const difficultyBadge = document.getElementById('card-difficulty');
+        difficultyBadge.textContent = problem.difficulty;
+        difficultyBadge.className = 'px-2 py-1 rounded-full text-xs font-semibold text-white';
+        
+        if (problem.difficulty === 'Easy') {
+          difficultyBadge.classList.add('bg-green-500');
+        } else if (problem.difficulty === 'Medium') {
+          difficultyBadge.classList.add('bg-yellow-500');
+        } else {
+          difficultyBadge.classList.add('bg-red-500');
+        }
+        
+        // Update content
+        document.getElementById('question-content').textContent = problem.question;
+        document.getElementById('hint-content').textContent = problem.hint;
+        document.getElementById('mnemonic-content').textContent = problem.mnemonic;
+        document.getElementById('code-block').textContent = problem.code;
+        
+        // Reset tabs
+        document.getElementById('question-tab').click();
+        document.getElementById('mnemonic-tab').click();
+      }
+
+      // Event listeners
+      backButton.addEventListener('click', () => {
+        flashcardSection.classList.add('hidden');
+        topicSection.classList.remove('hidden');
+      });
+      
+      prevButton.addEventListener('click', () => {
+        if (currentProblemIndex > 0) {
+          currentProblemIndex--;
+          loadProblem();
+        }
+      });
+      
+      nextButton.addEventListener('click', () => {
+        if (currentProblemIndex < problems[selectedTopicId].length - 1) {
+          currentProblemIndex++;
+          loadProblem();
+        }
+      });
+      
+      // Tab switching - front
+      document.getElementById('question-tab').addEventListener('click', () => {
+        document.getElementById('question-tab').classList.add('border-blue-500', 'text-blue-600');
+        document.getElementById('hint-tab').classList.remove('border-blue-500', 'text-blue-600');
+        document.getElementById('question-content').classList.remove('hidden');
+        document.getElementById('hint-content').classList.add('hidden');
+      });
+      
+      document.getElementById('hint-tab').addEventListener('click', () => {
+        document.getElementById('hint-tab').classList.add('border-blue-500', 'text-blue-600');
+        document.getElementById('question-tab').classList.remove('border-blue-500', 'text-blue-600');
+        document.getElementById('hint-content').classList.remove('hidden');
+        document.getElementById('question-content').classList.add('hidden');
+      });
+      
+      // Tab switching - back
+      document.getElementById('mnemonic-tab').addEventListener('click', () => {
+        document.getElementById('mnemonic-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('code-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('mnemonic-content').classList.remove('hidden');
+        document.getElementById('code-content').classList.add('hidden');
+      });
+      
+      document.getElementById('code-tab').addEventListener('click', () => {
+        document.getElementById('code-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('mnemonic-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('code-content').classList.remove('hidden');
+        document.getElementById('mnemonic-content').classList.add('hidden');
+      });
+      
+      // Card flipping
+      flashcard.addEventListener('click', (e) => {
+        // Don't flip when clicking tabs
+        if (e.target.closest('button')) return;
+        flashcard.classList.toggle('flipped');
+      });
+
+      // Initialize
+      populateTopics();
+    });
+  </script>
+</body>
+</html>
