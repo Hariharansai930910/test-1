@@ -35,7 +35,7 @@
       color: white;
       transform: rotateY(180deg);
     }
-    .tab-content {
+          .tab-content {
       height: calc(100% - 120px);
       overflow-y: auto;
     }
@@ -44,7 +44,7 @@
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1rem;
     }
-        .flip-card-container {
+    .flip-card-container {
       perspective: 1000px;
       width: 100%;
       max-width: 600px;
@@ -54,6 +54,12 @@
     .flip-card-front, .flip-card-back {
       border: 1px solid #ccc;
       min-height: 500px; /* Ensure minimum height */
+    }
+    /* Add scrollbar styling for code blocks */
+    #code-content pre {
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -739,47 +745,207 @@ def findKthLargest(nums, k):
             difficulty: 'Medium',
             question: 'You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges where times[i] = (ui, vi, wi) means node ui to node vi takes wi time. Return the minimum time it takes for all the n nodes to receive the signal, or -1 if it is impossible.',
             hint: 'Use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.',
-            oneLiner: 'Use Dijkstra\'s algorithm to find shortest paths from source to all nodes.',
-            threeLiner: 'We use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.\nWe keep track of the time it takes for the signal to reach each node.\nThe result is the maximum time among all nodes, or -1 if not all nodes can be reached.',
-            mnemonic: 'The "Signal Tracker" - like measuring how long it takes for a signal to reach all nodes in a network.',
-            code: `import heapq
+            oneLiner: 'Use Dijkstra\'s algorithm to find shortest time to all nodes.',
+            threeLiner: 'We send a signal from one point.\nWe figure out how fast it can reach every other point.\nThe longest of those times is our answer.',
+            mnemonic: '"Build graph" → graph[u].append((v, w))\n"Min-heap Dijkstra" → heappop(heap) gives node with smallest time\n"Update time" → if new_time < dist[v]: update and push',
+            code: `class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        edges = collections.defaultdict(list)
+        for u, v, w in times:
+            edges[u].append((v, w))
 
-def networkDelayTime(times, n, k):
-    # Build graph
-    graph = {}
-    for u, v, w in times:
-        if u not in graph:
-            graph[u] = []
-        graph[u].append((v, w))
-    
-    # Min heap to track shortest distances
-    heap = [(0, k)]  # (time, node)
-    visited = set()
-    
-    # Dijkstra's algorithm
-    while heap:
-        time, node = heapq.heappop(heap)
-        
-        if node in visited:
-            continue
-            
-        visited.add(node)
-        
-        # If all nodes are visited, return time
-        if len(visited) == n:
-            return time
-        
-        # Add neighbors to heap
-        if node in graph:
-            for neighbor, weight in graph[node]:
-                if neighbor not in visited:
-                    heapq.heappush(heap, (time + weight, neighbor))
-    
-    # If not all nodes can be reached
-    return -1
+        minHeap = [(0, k)]
+        visit = set()
+        t = 0
+        while minHeap:
+            w1, n1 = heapq.heappop(minHeap)
+            if n1 in visit:
+                continue
+            visit.add(n1)
+            t = w1
+
+            for n2, w2 in edges[n1]:
+                if n2 not in visit:
+                    heapq.heappush(minHeap, (w1 + w2, n2))
+        return t if len(visit) == n else -1
 
 # Time Complexity: O(E log V) where E is the number of edges and V is the number of nodes
 # Space Complexity: O(E + V)`
+          },
+          {
+            title: 'Reconstruct Itinerary',
+            difficulty: 'Hard',
+            question: 'Given a list of airline tickets represented by pairs of departure and arrival airports [from, to], reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK. If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order when read as a single string.',
+            hint: 'Use depth-first search with backtracking to find the lexicographically smallest valid itinerary.',
+            oneLiner: 'Use DFS + min-heap to build lexicographically smallest itinerary.',
+            threeLiner: 'We treat each airport as a point.\nWe travel using the smallest possible word (alphabetically).\nWhen all tickets are used, that\'s our path.',
+            mnemonic: '"Build min-heap graph" → graph[frm].append(to); heapify\n"DFS visit" → while graph[airport]: dfs(next_dest)\n"Build itinerary" → res.appendleft(airport)',
+            code: `class Solution:
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+        adj = defaultdict(list)
+        for src, dst in sorted(tickets)[::-1]:
+            adj[src].append(dst)
+            
+        stack = ["JFK"]
+        res = []
+        
+        while stack:
+            curr = stack[-1]
+            if not adj[curr]:
+                res.append(stack.pop())
+            else:
+                stack.append(adj[curr].pop())
+                
+        return res[::-1]
+
+# Time Complexity: O(E log E), where E is the number of edges (tickets)
+# Space Complexity: O(V + E), where V is the number of vertices (airports)`
+          },
+          {
+            title: 'Min Cost to Connect All Points',
+            difficulty: 'Medium',
+            question: 'You are given an array points representing integer coordinates of some points on a 2D-plane, where points[i] = [xi, yi]. The cost of connecting two points [xi, yi] and [xj, yj] is the manhattan distance between them: |xi - xj| + |yi - yj|. Return the minimum cost to make all points connected.',
+            hint: 'This is a Minimum Spanning Tree (MST) problem. Consider using Prim\'s or Kruskal\'s algorithm.',
+            oneLiner: 'Use Prim\'s algorithm (MST) with min-heap for Manhattan distances.',
+            threeLiner: 'We connect all dots with the least total cost.\nWe always choose the shortest connection that\'s not yet used.\nWhen all points are connected, we stop.',
+            mnemonic: '"Heap init" → heap = [(0, 0)] (cost, node)\n"Track visited" → if node not in visited: add to cost\n"Push neighbors" → for every next_point: heappush with distance',
+            code: `class Solution:
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+        n, node = len(points), 0
+        dist = [100000000] * n
+        visit = [False] * n
+        edges, res = 0, 0
+
+        while edges < n - 1:
+            visit[node] = True
+            nextNode = -1
+            for i in range(n):
+                if visit[i]:
+                    continue
+                curDist = (abs(points[i][0] - points[node][0]) + 
+                           abs(points[i][1] - points[node][1]))
+                dist[i] = min(dist[i], curDist)
+                if nextNode == -1 or dist[i] < dist[nextNode]:
+                    nextNode = i
+                    
+            res += dist[nextNode]
+            node = nextNode
+            edges += 1
+
+        return res
+
+# Time Complexity: O(n²) where n is the number of points
+# Space Complexity: O(n)`
+          },
+          {
+            title: 'Swim in Rising Water',
+            difficulty: 'Hard',
+            question: 'On an N x N grid, each square has a height. At time t, the water level is at height t. You can swim from a square to another 4-directionally adjacent square if and only if the elevation of both squares individually are at most t. Return the least time until you can reach the bottom right square (N-1, N-1) if you start at the top left square (0, 0).',
+            hint: 'Think of using a priority queue to always explore the path with the minimum maximum height.',
+            oneLiner: 'Use Dijkstra-style BFS to always swim in the minimum rising level.',
+            threeLiner: 'We treat the grid like a pool filling up.\nWe can only move to spots that are less than or equal to the current water level.\nWe find the smallest max value along the path to the bottom.',
+            mnemonic: '"Heap by elevation" → heappush(heap, (elevation, r, c))\n"Track max" → max_time = max(max_time, grid[r][c])\n"Stop at end" → if r == n-1 and c == n-1: return max_time',
+            code: `class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        N = len(grid)
+        visit = set()
+        minH = [[grid[0][0], 0, 0]]  # (time/max-height, r, c)
+        directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+        visit.add((0, 0))
+        while minH:
+            t, r, c = heapq.heappop(minH)
+            if r == N - 1 and c == N - 1:
+                return t
+            for dr, dc in directions:
+                neiR, neiC = r + dr, c + dc
+                if (neiR < 0 or neiC < 0 or 
+                    neiR == N or neiC == N or
+                    (neiR, neiC) in visit
+                ):
+                    continue
+                visit.add((neiR, neiC))
+                heapq.heappush(minH, [max(t, grid[neiR][neiC]), neiR, neiC])
+
+# Time Complexity: O(n² log n) where n is the grid size
+# Space Complexity: O(n²)`
+          },
+          {
+            title: 'Alien Dictionary',
+            difficulty: 'Hard',
+            question: 'Given a sorted dictionary of alien words, find the order of characters in the alien language. The dictionary may contain duplicates and not all letters from the alien language may be used in the dictionary.',
+            hint: 'Treat each character as a node in a graph, and create edges based on the order of characters in adjacent words.',
+            oneLiner: 'Build graph from character order and use topological sort (BFS).',
+            threeLiner: 'We look at word pairs to learn which letter comes first.\nWe build a graph of rules from those pairs.\nThen we sort the letters based on what comes before what.',
+            mnemonic: '"Build graph" → if a != b: graph[a].append(b); indegree[b] += 1\n"Start with 0 indegree" → queue = letters with indegree 0\n"Topo sort" → while queue: pop letter, reduce indegrees',
+            code: `class Solution:
+    def foreignDictionary(self, words):
+        adj = {c: set() for w in words for c in w}
+        indegree = {c: 0 for c in adj}
+        
+        for i in range(len(words) - 1):
+            w1, w2 = words[i], words[i + 1]
+            minLen = min(len(w1), len(w2))
+            if len(w1) > len(w2) and w1[:minLen] == w2[:minLen]:
+                return ""
+            for j in range(minLen):
+                if w1[j] != w2[j]:
+                    if w2[j] not in adj[w1[j]]:
+                        adj[w1[j]].add(w2[j])
+                        indegree[w2[j]] += 1
+                    break
+        
+        q = deque([c for c in indegree if indegree[c] == 0])
+        res = []
+        
+        while q:
+            char = q.popleft()
+            res.append(char)
+            for neighbor in adj[char]:
+                indegree[neighbor] -= 1
+                if indegree[neighbor] == 0:
+                    q.append(neighbor)
+        
+        if len(res) != len(indegree):
+            return ""
+        
+        return "".join(res)
+
+# Time Complexity: O(C) where C is the total length of all words
+# Space Complexity: O(1) since there are at most 26 unique characters`
+          },
+          {
+            title: 'Cheapest Flights Within K Stops',
+            difficulty: 'Medium',
+            question: 'There are n cities connected by some number of flights. You are given an array flights where flights[i] = [fromi, toi, pricei] indicates that there is a flight from city fromi to city toi with cost pricei. You are also given three integers src, dst, and k, return the cheapest price from src to dst with at most k stops. If there is no such route, return -1.',
+            hint: 'Use a BFS-like approach, but keep track of the number of stops and the cost.',
+            oneLiner: 'Use modified BFS (Bellman-Ford style) with (cost, node, stops).',
+            threeLiner: 'We look for the cheapest flight path with limited stops.\nWe explore each city step by step.\nWe avoid paths that are too long or expensive.',
+            mnemonic: '"Queue with stops" → heap = [(0, src, 0)]\n"If stops ≤ K" → push (cost + price, next, stops + 1)\n"Track cheapest" → if city == dst: return cost',
+            code: `class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+        prices = [float("inf")] * n
+        prices[src] = 0
+        adj = [[] for _ in range(n)]
+        for u, v, cst in flights:
+            adj[u].append([v, cst])
+
+        q = deque([(0, src, 0)])
+        while q:
+            cst, node, stops = q.popleft()
+            if stops > k:
+                continue
+            
+            for nei, w in adj[node]:
+                nextCost = cst + w
+                if nextCost < prices[nei]:
+                    prices[nei] = nextCost
+                    q.append((nextCost, nei, stops + 1))
+
+        return prices[dst] if prices[dst] != float("inf") else -1
+
+# Time Complexity: O(E * K) where E is the number of edges/flights and K is the maximum stops
+# Space Complexity: O(V) where V is the number of vertices/cities`
           }
         ],
         graphs: [
