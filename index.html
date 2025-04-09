@@ -104,11 +104,16 @@
             </div>
             <div class="border-b border-gray-600">
               <div class="flex">
-                <button id="mnemonic-tab" class="px-4 py-2 border-b-2 border-blue-300 text-blue-300">Mnemonic</button> <button id="code-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Code</button>
+                <button id="one-liner-tab" class="px-4 py-2 border-b-2 border-blue-300 text-blue-300">One-liner</button>
+                <button id="three-liner-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-300">3-liner</button>
+                <button id="mnemonic-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Mnemonic</button>
+                <button id="code-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Code</button>
               </div>
             </div>
             <div class="tab-content p-5">
-              <div id="mnemonic-content" class="text-white"></div>
+              <div id="one-liner-content" class="text-white"></div>
+              <div id="three-liner-content" class="text-white hidden"></div>
+              <div id="mnemonic-content" class="text-white hidden"></div>
               <div id="code-content" class="hidden">
                 <pre id="code-block" class="font-mono text-sm bg-gray-900 p-4 rounded text-white overflow-auto"></pre>
               </div>
@@ -150,63 +155,266 @@
         { id: 'mathgeometry', name: 'Math & Geometry' },
       ];
 
-      // Sample problems
-  // Problems data
-  const problems = {
-  arrays: [
-    {
-      title: 'Contains Duplicate',
-      difficulty: 'Easy',
-      question: 'Given an integer array nums, return true if any value appears more than once in the array, otherwise return false.',
-      hint: 'Think about using a data structure that allows for O(1) lookups.',
-      mnemonic: 'The "Club Entry Check" - like a bouncer checking if someone is already inside the club (HashSet).',
-      code: `def containsDuplicate(nums):
-    seen = set()
-    for num in nums:
-        if num in seen:
-            return True
-        seen.add(num)
-    return False
-
-  # Time Complexity: O(n)
-  # Space Complexity: O(n)`
-    },
-    {
-      title: 'Valid Anagram',
-      difficulty: 'Easy',
-      question: 'Given two strings s and t, return true if t is an anagram of s, and false otherwise. An anagram is a word formed by rearranging the letters of another word.',
-      hint: 'Count the occurrences of each character in both strings.',
-      mnemonic: 'The "Letter Counter" - like counting and comparing ingredients for two recipes.',
-      code: `def isAnagram(s, t):
-    if len(s) != len(t):
+      // Problems data
+      const problems = {
+        arrays: [
+          {
+            title: 'Contains Duplicate',
+            difficulty: 'Easy',
+            question: 'Given an integer array nums, return true if any value appears more than once in the array, otherwise return false.\n\nExample 1:\nInput: nums = [1, 2, 3, 3]\nOutput: true',
+            hint: 'Think about using a data structure that allows for O(1) lookups.',
+            oneLiner: 'Use a set to check if any element repeats.',
+            threeLiner: 'We go through each number.\nWe keep a list of ones we\'ve already seen.\nIf a number shows up again, we know it\'s a duplicate.',
+            mnemonic: '"Seen before?" → if num in seen: return True\n"Add new" → seen.add(num)\n"End clean" → return False',
+            code: `class Solution:
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        seen = set()
+        for num in nums:
+            if num in seen:
+                return True
+            seen.add(num)
         return False
-        
-    char_count = {}
-    
-    # Count characters in s
-    for char in s:
-        char_count[char] = char_count.get(char, 0) + 1
-        
-    # Decrement counts for t
-    for char in t:
-        if char not in char_count or char_count[char] == 0:
-            return False
-        char_count[char] -= 1
-        
-    return True
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1) - as there are only 26 possible lowercase letters`
-    }
-  ],
-  twopointers: [
-    {
-      title: 'Valid Palindrome',
-      difficulty: 'Easy',
-      question: 'A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.',
-      hint: 'Use two pointers: one starting from the beginning and one from the end.',
-      mnemonic: 'The "Mirror Check" - like looking at a word from both sides to see if they match.',
-      code: `def isPalindrome(s):
+# Time Complexity: O(n)
+# Space Complexity: O(n)`
+          },
+          {
+            title: 'Valid Anagram',
+            difficulty: 'Easy',
+            question: 'Given two strings s and t, return true if the two strings are anagrams of each other, otherwise return false.\n\nAn anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.\n\nExample 1:\n\nInput: s = "racecar", t = "carrace"\nOutput: true',
+            hint: 'Count the occurrences of each character in both strings.',
+            oneLiner: 'Use counters (hashmaps) to compare character frequencies.',
+            threeLiner: 'We count the letters in both words.\nIf every letter shows up the same number of times, it\'s an anagram.\nOtherwise, it\'s not.',
+            mnemonic: '"Count both" → Counter(s) == Counter(t)\n"Compare maps" → for key in counts: compare values\n"Return result" → return True/False',
+            code: `class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+
+        count = [0] * 26
+        for i in range(len(s)):
+            count[ord(s[i]) - ord('a')] += 1
+            count[ord(t[i]) - ord('a')] -= 1
+
+        for val in count:
+            if val != 0:
+                return False
+        return True
+
+# Time complexity: O(n+m)
+# Space complexity: O(1) since we have at most 26 different characters.`
+          },
+          {
+            title: 'Two Sum',
+            difficulty: 'Easy',
+            question: 'Given an array of integers nums and an integer target, return the indices i and j such that nums[i] + nums[j] == target and i != j.\n\nYou may assume that every input has exactly one pair of indices i and j that satisfy the condition.\n\nReturn the answer with the smaller index first.\n\nExample 1:\n\nInput: nums = [3,4,5,6], target = 7\n\nOutput: [0,1]',
+            hint: 'Use a hash map to store the indices of the elements you\'ve seen so far.',
+            oneLiner: 'Store each number\'s complement in a hashmap as we loop.',
+            threeLiner: 'We look for two numbers that add to a target.\nWe remember each number we see and what we need to reach the target.\nIf we find the right pair, we return their positions.',
+            mnemonic: '"Check map" → if target - num in seen: return [i, seen[target - num]]\n"Store index" → seen[num] = i\n"Loop through" → for i, num in enumerate(nums):',
+            code: `class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        indices = {}  # val -> index
+
+        for i, n in enumerate(nums):
+            indices[n] = i
+
+        for i, n in enumerate(nums):
+            diff = target - n
+            if diff in indices and indices[diff] != i:
+                return [i, indices[diff]]
+
+# Time complexity: O(n)
+# Space complexity: O(n)`
+          },
+          {
+            title: 'Group Anagrams',
+            difficulty: 'Medium',
+            question: 'Given an array of strings strs, group all anagrams together into sublists. You may return the output in any order.\n\nAn anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.\n\nExample 1:\n\nInput: strs = ["act","pots","tops","cat","stop","hat"]\n\nOutput: [["hat"],["act", "cat"],["stop", "pots", "tops"]]',
+            hint: 'Think about what makes two strings anagrams of each other. How can you represent that property as a key in a hash map?',
+            oneLiner: 'Group words using sorted letters as a key in a hashmap.',
+            threeLiner: 'We sort the letters in each word.\nWords with the same letters go into the same group.\nWe collect all the groups.',
+            mnemonic: '"Sort word" → key = \'\'.join(sorted(word))\n"Group by key" → anagram_map[key].append(word)\n"Return values" → return anagram_map.values()',
+            code: `class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        res = defaultdict(list)
+        for s in strs:
+            count = [0] * 26
+            for c in s:
+                count[ord(c) - ord('a')] += 1
+            res[tuple(count)].append(s)
+        return list(res.values())
+
+# Time complexity: O(m*n)
+# Space complexity: O(m)`
+          },
+          {
+            title: 'Top K Frequent Elements',
+            difficulty: 'Medium',
+            question: 'Given an integer array nums and an integer k, return the k most frequent elements within the array.\n\nThe test cases are generated such that the answer is always unique.\n\nYou may return the output in any order.\n\nExample 1:\n\nInput: nums = [1,2,2,3,3,3], k = 2\n\nOutput: [2,3]',
+            hint: 'Count the frequency of each element and then find the k elements with the highest frequency.',
+            oneLiner: 'Use a counter and a heap to get the top k items.',
+            threeLiner: 'We count how many times each number shows up.\nWe keep the k most common ones.\nThen we return them.',
+            mnemonic: '"Count frequency" → count = Counter(nums)\n"Heap select top" → heapq.nlargest(k, count.keys(), key=count.get)\n"Return result" → return result',
+            code: `class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        count = {}
+        freq = [[] for i in range(len(nums) + 1)]
+
+        for num in nums:
+            count[num] = 1 + count.get(num, 0)
+        for num, cnt in count.items():
+            freq[cnt].append(num)
+        
+        res = []
+        for i in range(len(freq) - 1, 0, -1):
+            for num in freq[i]:
+                res.append(num)
+                if len(res) == k:
+                    return res
+
+# Time complexity: O(n)
+# Space complexity: O(n)`
+          },
+          {
+            title: 'Encode and Decode Strings',
+            difficulty: 'Medium',
+            question: 'Design an algorithm to encode a list of strings to a single string. The encoded string is then decoded back to the original list of strings.\n\nPlease implement encode and decode\n\nExample 1:\n\nInput: ["neet","code","love","you"]\n\nOutput:["neet","code","love","you"]',
+            hint: 'Think about how to separate the strings in a way that can be unambiguously decoded.',
+            oneLiner: 'Use a length prefix or delimiter to encode, then decode safely.',
+            threeLiner: 'We turn each word into a number + word combo.\nThat way we can separate them later.\nWe read the length to split them back correctly.',
+            mnemonic: '"Encode with length" → s = str(len(word)) + "#" + word\n"Split by count" → length = int(s[:i]), then s[i+1:i+1+length]\n"Loop until done" → while i < len(s): decode',
+            code: `class Solution:
+    
+    def encode(self, strs: List[str]) -> str:
+        res = ""
+        for s in strs:
+            res += str(len(s)) + "#" + s
+        return res
+
+    def decode(self, s: str) -> List[str]:
+        res = []
+        i = 0
+        
+        while i < len(s):
+            j = i
+            while s[j] != '#':
+                j += 1
+            length = int(s[i:j])
+            i = j + 1
+            j = i + length
+            res.append(s[i:j])
+            i = j
+            
+        return res
+
+# Time complexity: O(m) for each encode() and decode() function calls.
+# Space complexity: O(m+n) for each encode() and decode() function calls`
+          },
+          {
+            title: 'Product of Array Except Self',
+            difficulty: 'Medium',
+            question: 'Given an integer array nums, return an array output where output[i] is the product of all the elements of nums except nums[i].\n\nEach product is guaranteed to fit in a 32-bit integer.\n\nFollow-up: Could you solve it in O(n) time without using the division operation?\n\nExample 1:\n\nInput: nums = [1,2,4,6]\n\nOutput: [48,24,12,8]',
+            hint: 'Try to solve this problem using two passes through the array, one from the left and one from the right.',
+            oneLiner: 'Use prefix and suffix multiplications without division.',
+            threeLiner: 'We find how much every number would be if we multiply all other numbers.\nFirst, we go left to right.\nThen, we go right to left and finish the math.',
+            mnemonic: '"Left pass" → for i in range(n): res[i] *= prefix\n"Right pass" → for i in reversed(range(n)): res[i] *= suffix\n"Update prefixes" → prefix *= nums[i], suffix *= nums[i]',
+            code: `class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        res = [1] * (len(nums))
+
+        prefix = 1
+        for i in range(len(nums)):
+            res[i] = prefix
+            prefix *= nums[i]
+        postfix = 1
+        for i in range(len(nums) - 1, -1, -1):
+            res[i] *= postfix
+            postfix *= nums[i]
+        return res
+
+# Time complexity: O(n)
+# Space complexity: O(1) since the output array is excluded from space analysis.`
+          },
+          {
+            title: 'Valid Sudoku',
+            difficulty: 'Medium',
+            question: 'You are given a 9 x 9 Sudoku board board. A Sudoku board is valid if the following rules are followed:\n\nEach row must contain the digits 1-9 without duplicates.\nEach column must contain the digits 1-9 without duplicates.\nEach of the nine 3 x 3 sub-boxes of the grid must contain the digits 1-9 without duplicates.\nReturn true if the Sudoku board is valid, otherwise return false\n\nNote: A board does not need to be full or be solvable to be valid.',
+            hint: 'Use sets to track seen digits in each row, column, and 3x3 sub-box.',
+            oneLiner: 'Use sets to check each row, column, and 3x3 box.',
+            threeLiner: 'Each row, column, and box must have unique numbers.\nWe go through the board and record what we see.\nIf anything repeats in the same row, column, or box, it\'s not valid.',
+            mnemonic: '"Check each cell" → for i in range(9): for j in range(9):\n"Use 3 keys" → row[i], col[j], box[i//3, j//3]\n"Add or return False" → if val in set: return False else: add',
+            code: `class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        for row in range(9):
+            seen = set()
+            for i in range(9):
+                if board[row][i] == ".": 
+                    continue
+                if board[row][i] in seen:
+                    return False
+                seen.add(board[row][i])
+        
+        for col in range(9):
+            seen = set()
+            for i in range(9):
+                if board[i][col] == ".":
+                    continue
+                if board[i][col] in seen:
+                    return False
+                seen.add(board[i][col])
+            
+        for square in range(9):
+            seen = set()
+            for i in range(3):
+                for j in range(3):
+                    row = (square//3) * 3 + i
+                    col = (square % 3) * 3 + j
+                    if board[row][col] == ".":
+                        continue
+                    if board[row][col] in seen:
+                        return False
+                    seen.add(board[row][col])
+        return True
+
+# Time complexity: O(n^2)
+# Space complexity: O(n^2)`
+          },
+          {
+            title: 'Longest Consecutive Sequence',
+            difficulty: 'Medium',
+            question: 'Given an array of integers nums, return the length of the longest consecutive sequence of elements that can be formed.\n\nA consecutive sequence is a sequence of elements in which each element is exactly 1 greater than the previous element. The elements do not have to be consecutive in the original array.\n\nYou must write an algorithm that runs in O(n) time.\n\nExample 1:\n\nInput: nums = [2,20,4,10,3,4,5]\n\nOutput: 4',
+            hint: 'Consider using a Set data structure to optimize lookups when checking for consecutive elements.',
+            oneLiner: 'Use a set and expand sequences from the smallest number.',
+            threeLiner: 'We put all the numbers in a quick lookup set.\nThen we start from numbers that are the beginning of a sequence.\nWe count how long each chain goes.',
+            mnemonic: '"Add to set" → num_set = set(nums)\n"Start from beginning" → if num - 1 not in num_set:\n"Expand right" → while num + streak in num_set: streak += 1',
+            code: `class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        numSet = set(nums)
+        longest = 0
+
+        for num in numSet:
+            if (num - 1) not in numSet:
+                length = 1
+                while (num + length) in numSet:
+                    length += 1
+                longest = max(length, longest)
+        return longest
+
+# Time complexity: O(n)
+# Space complexity: O(n)`
+          }
+        ],
+        twopointers: [
+          {
+            title: 'Valid Palindrome',
+            difficulty: 'Easy',
+            question: 'A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.',
+            hint: 'Use two pointers: one starting from the beginning and one from the end.',
+            oneLiner: 'Clean the string and check if it equals its reverse, or use two pointers from both ends.',
+            threeLiner: 'We ignore spaces, punctuation, and letter case.\nWe check if the remaining letters and numbers read the same forward and backward.\nWe can do this by comparing characters from both ends moving inward.',
+            mnemonic: 'The "Mirror Check" - like looking at a word from both sides to see if they match.',
+            code: `def isPalindrome(s):
     left, right = 0, len(s) - 1
     
     while left < right:
@@ -225,18 +433,20 @@
         
     return True
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  stack: [
-    {
-      title: 'Valid Parentheses',
-      difficulty: 'Easy',
-      question: 'Given a string s containing just the characters \'(\', \')\', \'{\', \'}\', \'[\' and \']\', determine if the input string is valid.',
-      hint: 'Use a stack to keep track of opening brackets.',
-      mnemonic: 'The "Bracket Matcher" - like pairing left and right gloves.',
-      code: `def isValid(s):
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        stack: [
+          {
+            title: 'Valid Parentheses',
+            difficulty: 'Easy',
+            question: 'Given a string s containing just the characters \'(\', \')\', \'{\', \'}\', \'[\' and \']\', determine if the input string is valid.',
+            hint: 'Use a stack to keep track of opening brackets.',
+            oneLiner: 'Use a stack to match opening and closing brackets.',
+            threeLiner: 'We push opening brackets onto a stack.\nWhen we see a closing bracket, it must match the last opening bracket.\nIf everything matches and the stack is empty at the end, it\'s valid.',
+            mnemonic: 'The "Bracket Matcher" - like pairing left and right gloves.',
+            code: `def isValid(s):
     stack = []
     mapping = {")": "(", "}": "{", "]": "["}
     
@@ -250,18 +460,20 @@
     
     return not stack  # stack should be empty at the end
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(n)`
-    }
-  ],
-  binarysearch: [
-    {
-      title: 'Binary Search',
-      difficulty: 'Easy',
-      question: 'Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.',
-      hint: 'Use the binary search algorithm by repeatedly dividing the search interval in half.',
-      mnemonic: 'The "Phone Book Search" - like finding a name in a phone book by dividing pages.',
-      code: `def search(nums, target):
+# Time Complexity: O(n)
+# Space Complexity: O(n)`
+          }
+        ],
+        binarysearch: [
+          {
+            title: 'Binary Search',
+            difficulty: 'Easy',
+            question: 'Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.',
+            hint: 'Use the binary search algorithm by repeatedly dividing the search interval in half.',
+            oneLiner: 'Use divide and conquer to find the target in a sorted array.',
+            threeLiner: 'We look at the middle element to see if it\'s our target.\nIf not, we eliminate half the array based on if our target is higher or lower.\nWe repeat until we find the target or run out of elements.',
+            mnemonic: 'The "Phone Book Search" - like finding a name in a phone book by dividing pages.',
+            code: `def search(nums, target):
     left, right = 0, len(nums) - 1
     
     while left <= right:
@@ -277,18 +489,20 @@
     
     return -1  # Target not found
 
-  # Time Complexity: O(log n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  slidingwindow: [
-    {
-      title: 'Best Time to Buy and Sell Stock',
-      difficulty: 'Easy',
-      question: 'You are given an array prices where prices[i] is the price of a given stock on the ith day. You want to maximize your profit by choosing a single day to buy and a single day to sell.',
-      hint: 'Keep track of the minimum price you\'ve seen so far, and calculate the maximum profit as you go through the array.',
-      mnemonic: 'The "Bargain Hunter" - like buying at lowest price and selling at highest after.',
-      code: `def maxProfit(prices):
+# Time Complexity: O(log n)
+# Space Complexity: O(1)`
+          }
+        ],
+        slidingwindow: [
+          {
+            title: 'Best Time to Buy and Sell Stock',
+            difficulty: 'Easy',
+            question: 'You are given an array prices where prices[i] is the price of a given stock on the ith day. You want to maximize your profit by choosing a single day to buy and a single day to sell.',
+            hint: 'Keep track of the minimum price you\'ve seen so far, and calculate the maximum profit as you go through the array.',
+            oneLiner: 'Track the minimum price and find the maximum profit as you scan.',
+            threeLiner: 'We need to buy at a low price and sell at a higher price later.\nWe keep track of the lowest price we\'ve seen so far.\nAt each day, we calculate profit = current price - lowest price, and update our max profit.',
+            mnemonic: 'The "Bargain Hunter" - like buying at lowest price and selling at highest after.',
+            code: `def maxProfit(prices):
     if not prices:
         return 0
         
@@ -302,18 +516,20 @@
     
     return max_profit
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  linkedlist: [
-    {
-      title: 'Reverse Linked List',
-      difficulty: 'Easy',
-      question: 'Given the head of a singly linked list, reverse the list, and return the reversed list.',
-      hint: 'Use three pointers to track the previous, current, and next nodes.',
-      mnemonic: 'The "Arrow Flipper" - like changing the direction of all arrows in a path.',
-      code: `def reverseList(head):
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        linkedlist: [
+          {
+            title: 'Reverse Linked List',
+            difficulty: 'Easy',
+            question: 'Given the head of a singly linked list, reverse the list, and return the reversed list.',
+            hint: 'Use three pointers to track the previous, current, and next nodes.',
+            oneLiner: 'Iterate with prev, current, and next pointers to reverse links.',
+            threeLiner: 'We keep track of three nodes: the previous, current, and next.\nWe update the current node to point to the previous one instead of the next.\nThen we move all our pointers forward and repeat until we\'ve processed all nodes.',
+            mnemonic: 'The "Arrow Flipper" - like changing the direction of all arrows in a path.',
+            code: `def reverseList(head):
     prev = None
     current = head
     
@@ -325,18 +541,20 @@
         
     return prev
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  trees: [
-    {
-      title: 'Maximum Depth of Binary Tree',
-      difficulty: 'Easy',
-      question: 'Given the root of a binary tree, return its maximum depth. A binary tree\'s maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.',
-      hint: 'Use recursion to find the depth of the left and right subtrees.',
-      mnemonic: 'The "Tree Height Finder" - like measuring the height of a tree.',
-      code: `def maxDepth(root):
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        trees: [
+          {
+            title: 'Maximum Depth of Binary Tree',
+            difficulty: 'Easy',
+            question: 'Given the root of a binary tree, return its maximum depth. A binary tree\'s maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.',
+            hint: 'Use recursion to find the depth of the left and right subtrees.',
+            oneLiner: 'Use recursion to find the maximum of left and right subtree depths, plus one.',
+            threeLiner: 'We use recursion to solve this problem.\nFor each node, we find the maximum depth of its left and right subtrees.\nWe add 1 to account for the current node and return the result.',
+            mnemonic: 'The "Tree Height Finder" - like measuring the height of a tree.',
+            code: `def maxDepth(root):
     if not root:
         return 0
         
@@ -345,23 +563,25 @@
     
     return max(left_depth, right_depth) + 1
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(h) where h is the height of the tree`
-    }
-  ],
-  tries: [
-    {
-      title: 'Implement Trie (Prefix Tree)',
-      difficulty: 'Medium',
-      question: 'Implement a trie with insert, search, and startsWith methods.',
-      hint: 'Use a tree structure where each node has a dictionary of children.',
-      mnemonic: 'The "Word Explorer" - like navigating a dictionary by following letter paths.',
-      code: `class TrieNode:
+# Time Complexity: O(n)
+# Space Complexity: O(h) where h is the height of the tree`
+          }
+        ],
+        tries: [
+          {
+            title: 'Implement Trie (Prefix Tree)',
+            difficulty: 'Medium',
+            question: 'Implement a trie with insert, search, and startsWith methods.',
+            hint: 'Use a tree structure where each node has a dictionary of children.',
+            oneLiner: 'Create a tree where each node represents a letter in a word path.',
+            threeLiner: 'We build a tree where each node has links to next characters.\nEach node also keeps track if it\'s the end of a word.\nWe walk the tree to insert and query words and prefixes.',
+            mnemonic: 'The "Word Explorer" - like navigating a dictionary by following letter paths.',
+            code: `class TrieNode:
     def __init__(self):
         self.children = {}
         self.is_end_of_word = False
 
-  class Trie:
+class Trie:
     def __init__(self):
         self.root = TrieNode()
         
@@ -389,18 +609,20 @@
             node = node.children[char]
         return True
 
-  # Time Complexity: O(m) for all operations, where m is the length of the word
-  # Space Complexity: O(m * n) where n is the number of words`
-    }
-  ],
-  backtracking: [
-    {
-      title: 'Subsets',
-      difficulty: 'Medium',
-      question: 'Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets.',
-      hint: 'Use backtracking to generate all possible combinations.',
-      mnemonic: 'The "Team Builder" - like forming all possible teams from a group of players.',
-      code: `def subsets(nums):
+# Time Complexity: O(m) for all operations, where m is the length of the word
+# Space Complexity: O(m * n) where n is the number of words`
+          }
+        ],
+        backtracking: [
+          {
+            title: 'Subsets',
+            difficulty: 'Medium',
+            question: 'Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets.',
+            hint: 'Use backtracking to generate all possible combinations.',
+            oneLiner: 'Build all possible combinations by choosing whether to include each element.',
+            threeLiner: 'We explore making two choices for each number: include it or skip it.\nWe use recursion to try all possible combinations.\nThis builds a solution by adding one element at a time and backtracking.',
+            mnemonic: 'The "Team Builder" - like forming all possible teams from a group of players.',
+            code: `def subsets(nums):
     result = []
     
     def backtrack(start, current):
@@ -414,20 +636,22 @@
     backtrack(0, [])
     return result
 
-  # Time Complexity: O(n * 2^n)
-  # Space Complexity: O(n) - depth of the recursion stack`
-    }
-  ],
-  heap: [
-    {
-      title: 'Kth Largest Element in an Array',
-      difficulty: 'Medium',
-      question: 'Given an integer array nums and an integer k, return the kth largest element in the array.',
-      hint: 'Use a min-heap of size k to keep track of the k largest elements.',
-      mnemonic: 'The "Top K Tracker" - like maintaining a leaderboard of the k highest scores.',
-      code: `import heapq
+# Time Complexity: O(n * 2^n)
+# Space Complexity: O(n) - depth of the recursion stack`
+          }
+        ],
+        heap: [
+          {
+            title: 'Kth Largest Element in an Array',
+            difficulty: 'Medium',
+            question: 'Given an integer array nums and an integer k, return the kth largest element in the array.',
+            hint: 'Use a min-heap of size k to keep track of the k largest elements.',
+            oneLiner: 'Use a min-heap of size k to track the k largest values.',
+            threeLiner: 'We maintain a heap with the k largest elements seen so far.\nWe keep the smallest of the k largest at the top for quick access.\nThis way, we can compare new elements with it and keep only the k largest.',
+            mnemonic: 'The "Top K Tracker" - like maintaining a leaderboard of the k highest scores.',
+            code: `import heapq
 
-  def findKthLargest(nums, k):
+def findKthLargest(nums, k):
     min_heap = []
     
     for num in nums:
@@ -439,18 +663,20 @@
     
     return min_heap[0]
 
-  # Time Complexity: O(n log k)
-  # Space Complexity: O(k)`
-    }
-  ],
-  intervals: [
-    {
-      title: 'Merge Intervals',
-      difficulty: 'Medium',
-      question: 'Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals.',
-      hint: 'Sort the intervals by their start time, then merge overlapping intervals.',
-      mnemonic: 'The "Appointment Combiner" - like merging overlapping meetings in a calendar.',
-      code: `def merge(intervals):
+# Time Complexity: O(n log k)
+# Space Complexity: O(k)`
+          }
+        ],
+        intervals: [
+          {
+            title: 'Merge Intervals',
+            difficulty: 'Medium',
+            question: 'Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals.',
+            hint: 'Sort the intervals by their start time, then merge overlapping intervals.',
+            oneLiner: 'Sort by start time and merge overlapping intervals sequentially.',
+            threeLiner: 'First, we sort the intervals by their start times.\nThen we add the first interval to our result and check each next interval.\nIf it overlaps with the last interval in our result, we merge them; otherwise, we add it as a new interval.',
+            mnemonic: 'The "Appointment Combiner" - like merging overlapping meetings in a calendar.',
+            code: `def merge(intervals):
     if not intervals:
         return []
     
@@ -473,18 +699,20 @@
     
     return merged
 
-  # Time Complexity: O(n log n) due to sorting
-  # Space Complexity: O(n) for the output array`
-    }
-  ],
-  greedy: [
-    {
-      title: 'Jump Game',
-      difficulty: 'Medium',
-      question: 'You are given an integer array nums. You are initially positioned at the first index of the array and each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index.',
-      hint: 'Keep track of the furthest position you can reach.',
-      mnemonic: 'The "Furthest Reach Tracker" - like marking the furthest point you can reach at any step.',
-      code: `def canJump(nums):
+# Time Complexity: O(n log n) due to sorting
+# Space Complexity: O(n) for the output array`
+          }
+        ],
+        greedy: [
+          {
+            title: 'Jump Game',
+            difficulty: 'Medium',
+            question: 'You are given an integer array nums. You are initially positioned at the first index of the array and each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index.',
+            hint: 'Keep track of the furthest position you can reach.',
+            oneLiner: 'Track the farthest position you can reach and update as you go.',
+            threeLiner: 'We keep track of the farthest position we can reach.\nAs we pass through the array, we update this farthest reach.\nIf at any point we can\'t reach the current position, we know we\'ll fail.',
+            mnemonic: 'The "Furthest Reach Tracker" - like marking the furthest point you can reach at any step.',
+            code: `def canJump(nums):
     max_reach = 0
     
     for i, jump in enumerate(nums):
@@ -501,20 +729,22 @@
     
     return True
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  advancedgraphs: [
-    {
-      title: 'Network Delay Time',
-      difficulty: 'Medium',
-      question: 'You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges where times[i] = (ui, vi, wi) means node ui to node vi takes wi time. Return the minimum time it takes for all the n nodes to receive the signal, or -1 if it is impossible.',
-      hint: 'Use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.',
-      mnemonic: 'The "Signal Tracker" - like measuring how long it takes for a signal to reach all nodes in a network.',
-      code: `import heapq
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        advancedgraphs: [
+          {
+            title: 'Network Delay Time',
+            difficulty: 'Medium',
+            question: 'You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges where times[i] = (ui, vi, wi) means node ui to node vi takes wi time. Return the minimum time it takes for all the n nodes to receive the signal, or -1 if it is impossible.',
+            hint: 'Use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.',
+            oneLiner: 'Use Dijkstra\'s algorithm to find shortest paths from source to all nodes.',
+            threeLiner: 'We use Dijkstra\'s algorithm to find the shortest path from the source to all other nodes.\nWe keep track of the time it takes for the signal to reach each node.\nThe result is the maximum time among all nodes, or -1 if not all nodes can be reached.',
+            mnemonic: 'The "Signal Tracker" - like measuring how long it takes for a signal to reach all nodes in a network.',
+            code: `import heapq
 
-  def networkDelayTime(times, n, k):
+def networkDelayTime(times, n, k):
     # Build graph
     graph = {}
     for u, v, w in times:
@@ -548,18 +778,20 @@
     # If not all nodes can be reached
     return -1
 
-  # Time Complexity: O(E log V) where E is the number of edges and V is the number of nodes
-  # Space Complexity: O(E + V)`
-    }
-  ],
-  graphs: [
-    {
-      title: 'Number of Islands',
-      difficulty: 'Medium',
-      question: 'Given an m x n 2D binary grid grid which represents a map of \'1\'s (land) and \'0\'s (water), return the number of islands.',
-      hint: 'Use DFS or BFS to explore all connected land cells, marking them as visited.',
-      mnemonic: 'The "Land Explorer" - like discovering and marking all connected pieces of land.',
-      code: `def numIslands(grid):
+# Time Complexity: O(E log V) where E is the number of edges and V is the number of nodes
+# Space Complexity: O(E + V)`
+          }
+        ],
+        graphs: [
+          {
+            title: 'Number of Islands',
+            difficulty: 'Medium',
+            question: 'Given an m x n 2D binary grid grid which represents a map of \'1\'s (land) and \'0\'s (water), return the number of islands.',
+            hint: 'Use DFS or BFS to explore all connected land cells, marking them as visited.',
+            oneLiner: 'Use DFS/BFS to find connected land components in the grid.',
+            threeLiner: 'We search the grid for land cells (1\'s).\nWhen we find one, we use DFS or BFS to explore all connected land cells and mark them as visited.\nEach time we start a new exploration, we count a new island.',
+            mnemonic: 'The "Land Explorer" - like discovering and marking all connected pieces of land.',
+            code: `def numIslands(grid):
     if not grid:
         return 0
         
@@ -587,18 +819,20 @@
     
     return count
 
-  # Time Complexity: O(m * n) where m and n are the dimensions of the grid
-  # Space Complexity: O(m * n) for the recursion stack in worst case`
-    }
-  ],
-  dp1d: [
-    {
-      title: 'Climbing Stairs',
-      difficulty: 'Easy',
-      question: 'You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?',
-      hint: 'The number of ways to reach step n is the sum of ways to reach steps n-1 and n-2.',
-      mnemonic: 'The "Fibonacci Climber" - like calculating Fibonacci numbers for each step.',
-      code: `def climbStairs(n):
+# Time Complexity: O(m * n) where m and n are the dimensions of the grid
+# Space Complexity: O(m * n) for the recursion stack in worst case`
+          }
+        ],
+        dp1d: [
+          {
+            title: 'Climbing Stairs',
+            difficulty: 'Easy',
+            question: 'You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?',
+            hint: 'The number of ways to reach step n is the sum of ways to reach steps n-1 and n-2.',
+            oneLiner: 'Calculate ways to reach each step using the sum of previous two steps.',
+            threeLiner: 'To reach a step, we can either come from one step before or two steps before.\nSo ways to reach step n = ways to reach step n-1 + ways to reach step n-2.\nThis is exactly like the Fibonacci sequence pattern.',
+            mnemonic: 'The "Fibonacci Climber" - like calculating Fibonacci numbers for each step.',
+            code: `def climbStairs(n):
     if n <= 2:
         return n
         
@@ -612,18 +846,20 @@
     
     return prev2
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  dp2d: [
-    {
-      title: 'Unique Paths',
-      difficulty: 'Medium',
-      question: 'A robot is located at the top-left corner of a m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid. How many possible unique paths are there?',
-      hint: 'The number of ways to reach a cell is the sum of ways to reach the cell above it and the cell to its left.',
-      mnemonic: 'The "Path Counter" - like counting all possible routes on a map.',
-      code: `def uniquePaths(m, n):
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        dp2d: [
+          {
+            title: 'Unique Paths',
+            difficulty: 'Medium',
+            question: 'A robot is located at the top-left corner of a m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid. How many possible unique paths are there?',
+            hint: 'The number of ways to reach a cell is the sum of ways to reach the cell above it and the cell to its left.',
+            oneLiner: 'For each cell, paths = paths from above + paths from left.',
+            threeLiner: 'We fill a grid where each cell stores the number of paths to reach it.\nTo reach any cell, we must come from either above or left.\nSo paths to cell (i,j) = paths to (i-1,j) + paths to (i,j-1).',
+            mnemonic: 'The "Path Counter" - like counting all possible routes on a map.',
+            code: `def uniquePaths(m, n):
     # Create a 2D DP table
     dp = [[1 for _ in range(n)] for _ in range(m)]
     
@@ -634,35 +870,39 @@
     
     return dp[m-1][n-1]
 
-  # Time Complexity: O(m * n)
-  # Space Complexity: O(m * n)`
-    }
-  ],
-  bitmanipulation: [
-    {
-      title: 'Single Number',
-      difficulty: 'Easy',
-      question: 'Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.',
-      hint: 'Think about using bitwise operations. XOR has an interesting property: n ^ n = 0.',
-      mnemonic: 'The "XOR Eliminator" - like items canceling out in pairs, leaving the odd one out.',
-      code: `def singleNumber(nums):
+# Time Complexity: O(m * n)
+# Space Complexity: O(m * n)`
+          }
+        ],
+        bitmanipulation: [
+          {
+            title: 'Single Number',
+            difficulty: 'Easy',
+            question: 'Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.',
+            hint: 'Think about using bitwise operations. XOR has an interesting property: n ^ n = 0.',
+            oneLiner: 'Use XOR to find the only non-repeated number.',
+            threeLiner: 'We know that XOR (^) of a number with itself is 0.\nAnd XOR of a number with 0 is the number itself.\nSo XORing all numbers will cancel out pairs, leaving only the single number.',
+            mnemonic: 'The "XOR Eliminator" - like items canceling out in pairs, leaving the odd one out.',
+            code: `def singleNumber(nums):
     result = 0
     for num in nums:
         result ^= num
     return result
 
-  # Time Complexity: O(n)
-  # Space Complexity: O(1)`
-    }
-  ],
-  mathgeometry: [
-    {
-      title: 'Happy Number',
-      difficulty: 'Easy',
-      question: 'Write an algorithm to determine if a number n is happy. A happy number is a number defined by the following process: Starting with any positive integer, replace the number by the sum of the squares of its digits, and repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.',
-      hint: 'Use a hash set to detect cycles.',
-      mnemonic: 'The "Square and Sum Cycle Detector" - like tracking a process that either reaches happiness or cycles endlessly.',
-      code: `def isHappy(n):
+# Time Complexity: O(n)
+# Space Complexity: O(1)`
+          }
+        ],
+        mathgeometry: [
+          {
+            title: 'Happy Number',
+            difficulty: 'Easy',
+            question: 'Write an algorithm to determine if a number n is happy. A happy number is a number defined by the following process: Starting with any positive integer, replace the number by the sum of the squares of its digits, and repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.',
+            hint: 'Use a hash set to detect cycles.',
+            oneLiner: 'Use a set to detect cycles and check if we reach 1.',
+            threeLiner: 'We calculate the sum of squares of digits repeatedly.\nWe use a set to detect if we\'ve seen a number before (which means we\'re in a cycle).\nIf we reach 1, it\'s a happy number; if we find a cycle without reaching 1, it\'s not.',
+            mnemonic: 'The "Square and Sum Cycle Detector" - like tracking a process that either reaches happiness or cycles endlessly.',
+            code: `def isHappy(n):
     seen = set()
     
     while n != 1 and n not in seen:
@@ -671,11 +911,11 @@
     
     return n == 1
 
-  # Time Complexity: O(log n)
-  # Space Complexity: O(log n)`
-    }
-  ]
-  };
+# Time Complexity: O(log n)
+# Space Complexity: O(log n)`
+          }
+        ]
+      };
 
       // DOM elements
       const topicSection = document.getElementById('topic-section');
@@ -770,12 +1010,16 @@
         // Update content
         document.getElementById('question-content').textContent = problem.question;
         document.getElementById('hint-content').textContent = problem.hint;
+        
+        // Update new fields from the array problems
+        if (problem.oneLiner) document.getElementById('one-liner-content').textContent = problem.oneLiner;
+        if (problem.threeLiner) document.getElementById('three-liner-content').textContent = problem.threeLiner;
         document.getElementById('mnemonic-content').textContent = problem.mnemonic;
         document.getElementById('code-block').textContent = problem.code;
         
         // Reset tabs
         document.getElementById('question-tab').click();
-        document.getElementById('mnemonic-tab').click();
+        document.getElementById('one-liner-tab').click();
       }
 
       // Event listeners
@@ -814,17 +1058,47 @@
       });
       
       // Tab switching - back
+      document.getElementById('one-liner-tab').addEventListener('click', () => {
+        document.getElementById('one-liner-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('three-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('mnemonic-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('code-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('one-liner-content').classList.remove('hidden');
+        document.getElementById('three-liner-content').classList.add('hidden');
+        document.getElementById('mnemonic-content').classList.add('hidden');
+        document.getElementById('code-content').classList.add('hidden');
+      });
+      
+      document.getElementById('three-liner-tab').addEventListener('click', () => {
+        document.getElementById('three-liner-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('one-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('mnemonic-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('code-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('three-liner-content').classList.remove('hidden');
+        document.getElementById('one-liner-content').classList.add('hidden');
+        document.getElementById('mnemonic-content').classList.add('hidden');
+        document.getElementById('code-content').classList.add('hidden');
+      });
+      
       document.getElementById('mnemonic-tab').addEventListener('click', () => {
         document.getElementById('mnemonic-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('one-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('three-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
         document.getElementById('code-tab').classList.remove('border-blue-300', 'text-blue-300');
         document.getElementById('mnemonic-content').classList.remove('hidden');
+        document.getElementById('one-liner-content').classList.add('hidden');
+        document.getElementById('three-liner-content').classList.add('hidden');
         document.getElementById('code-content').classList.add('hidden');
       });
       
       document.getElementById('code-tab').addEventListener('click', () => {
         document.getElementById('code-tab').classList.add('border-blue-300', 'text-blue-300');
+        document.getElementById('one-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
+        document.getElementById('three-liner-tab').classList.remove('border-blue-300', 'text-blue-300');
         document.getElementById('mnemonic-tab').classList.remove('border-blue-300', 'text-blue-300');
         document.getElementById('code-content').classList.remove('hidden');
+        document.getElementById('one-liner-content').classList.add('hidden');
+        document.getElementById('three-liner-content').classList.add('hidden');
         document.getElementById('mnemonic-content').classList.add('hidden');
       });
       
