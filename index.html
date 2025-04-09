@@ -6,7 +6,7 @@
   <title>LeetCode Flashcards</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    /* Ensure the grid displays even without JavaScript */
+    /* Basic styles */
     .topic-card {
       background-color: white;
       border: 1px solid #e2e8f0;
@@ -19,21 +19,74 @@
     .topic-card:hover {
       background-color: #ebf8ff;
     }
-    .topic-card h3 {
-      color: #1a202c;
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
-    .topic-card p {
-      color: #718096;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-    }
     .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1rem;
       padding: 1rem 0;
+    }
+    
+    /* Flashcard styles */
+    .flashcard {
+      width: 100%;
+      max-width: 600px;
+      min-height: 500px;
+      margin: 0 auto;
+      perspective: 1000px;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: left;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      min-height: 500px;
+      backface-visibility: hidden;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .flashcard-front {
+      background-color: white;
+      color: black;
+      z-index: 2;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .flashcard-back {
+      background-color: #2d3748;
+      color: white;
+      transform: rotateY(180deg);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .tab-content {
+      height: calc(100% - 120px);
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+    .tab {
+      display: none;
+    }
+    .tab.active {
+      display: block;
+    }
+    pre {
+      background-color: #1a202c;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -45,120 +98,216 @@
   </header>
   
   <main class="flex-grow container mx-auto p-6">
-    <div>
+    <!-- Topics Page -->
+    <div id="topics-page">
       <h2 class="text-xl font-semibold mb-6">Select a Topic</h2>
       
-      <!-- Static grid with hardcoded topics -->
       <div class="grid-container">
         <!-- Arrays and Hashing -->
-        <div class="topic-card" onclick="alert('Arrays and Hashing selected')">
-          <h3>Arrays and Hashing</h3>
-          <p>8 problems</p>
+        <div class="topic-card" onclick="showTopic('arrays')">
+          <h3 class="font-medium text-gray-900">Arrays and Hashing</h3>
+          <p class="text-gray-500 text-sm mt-1">8 problems</p>
         </div>
         
         <!-- Two Pointers -->
-        <div class="topic-card" onclick="alert('Two Pointers selected')">
-          <h3>Two Pointers</h3>
-          <p>5 problems</p>
+        <div class="topic-card" onclick="showTopic('twopointers')">
+          <h3 class="font-medium text-gray-900">Two Pointers</h3>
+          <p class="text-gray-500 text-sm mt-1">5 problems</p>
         </div>
         
-        <!-- Stack -->
-        <div class="topic-card" onclick="alert('Stack selected')">
-          <h3>Stack</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Binary Search -->
-        <div class="topic-card" onclick="alert('Binary Search selected')">
-          <h3>Binary Search</h3>
-          <p>7 problems</p>
-        </div>
-        
-        <!-- Sliding Window -->
-        <div class="topic-card" onclick="alert('Sliding Window selected')">
-          <h3>Sliding Window</h3>
-          <p>6 problems</p>
-        </div>
-        
-        <!-- Linked List -->
-        <div class="topic-card" onclick="alert('Linked List selected')">
-          <h3>Linked List</h3>
-          <p>10 problems</p>
-        </div>
-        
-        <!-- Trees -->
-        <div class="topic-card" onclick="alert('Trees selected')">
-          <h3>Trees</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Tries -->
-        <div class="topic-card" onclick="alert('Tries selected')">
-          <h3>Tries</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Backtracking -->
-        <div class="topic-card" onclick="alert('Backtracking selected')">
-          <h3>Backtracking</h3>
-          <p>8 problems</p>
-        </div>
-        
-        <!-- Heap/Priority Queue -->
-        <div class="topic-card" onclick="alert('Heap/Priority Queue selected')">
-          <h3>Heap/Priority Queue</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Intervals -->
-        <div class="topic-card" onclick="alert('Intervals selected')">
-          <h3>Intervals</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Greedy -->
-        <div class="topic-card" onclick="alert('Greedy selected')">
-          <h3>Greedy</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Advanced Graphs -->
-        <div class="topic-card" onclick="alert('Advanced Graphs selected')">
-          <h3>Advanced Graphs</h3>
-          <p>6 problems</p>
-        </div>
-        
-        <!-- Graphs -->
-        <div class="topic-card" onclick="alert('Graphs selected')">
-          <h3>Graphs</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- 1-D Dynamic Programming -->
-        <div class="topic-card" onclick="alert('1-D Dynamic Programming selected')">
-          <h3>1-D Dynamic Programming</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- 2-D Dynamic Programming -->
-        <div class="topic-card" onclick="alert('2-D Dynamic Programming selected')">
-          <h3>2-D Dynamic Programming</h3>
-          <p>1 problem</p>
-        </div>
-        
-        <!-- Bit Manipulation -->
-        <div class="topic-card" onclick="alert('Bit Manipulation selected')">
-          <h3>Bit Manipulation</h3>
-          <p>1 problem</p>
-        </div>
+        <!-- Other topics... -->
         
         <!-- Math & Geometry -->
-        <div class="topic-card" onclick="alert('Math & Geometry selected')">
-          <h3>Math & Geometry</h3>
-          <p>8 problems</p>
+        <div class="topic-card" onclick="showTopic('mathgeometry')">
+          <h3 class="font-medium text-gray-900">Math & Geometry</h3>
+          <p class="text-gray-500 text-sm mt-1">8 problems</p>
         </div>
       </div>
     </div>
+    
+    <!-- Math & Geometry Page -->
+    <div id="mathgeometry-page" class="hidden">
+      <div class="mb-6">
+        <button onclick="showTopics()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded">Back to Topics</button>
+        <h2 class="text-xl font-semibold mt-4">Math & Geometry</h2>
+        <div class="flex justify-between items-center mt-2">
+          <p id="mathgeometry-counter" class="text-gray-600">Problem 1 of 8</p>
+          <div class="flex gap-2">
+            <button onclick="prevProblem('mathgeometry')" class="bg-gray-200 px-3 py-1 rounded disabled:opacity-50" disabled>Previous</button>
+            <button onclick="nextProblem('mathgeometry')" class="bg-gray-200 px-3 py-1 rounded disabled:opacity-50">Next</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Happy Number Flashcard -->
+      <div id="mathgeometry-card-1" class="flashcard">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <div class="p-5 bg-blue-600 text-white flex justify-between items-center">
+              <h3 class="font-bold text-xl">Happy Number</h3>
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500">Easy</span>
+            </div>
+            <div class="border-b">
+              <div class="flex">
+                <button onclick="showTab('mathgeometry-1-question')" class="px-4 py-2 border-b-2 border-blue-500 text-blue-600">Question</button>
+                <button onclick="showTab('mathgeometry-1-hint')" class="px-4 py-2 border-b-2 border-transparent">Hint</button>
+              </div>
+            </div>
+            <div class="tab-content">
+              <div id="mathgeometry-1-question" class="tab active">
+                <p>Write an algorithm to determine if a number n is happy. A happy number is a number defined by the following process: Starting with any positive integer, replace the number by the sum of the squares of its digits, and repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.</p>
+              </div>
+              <div id="mathgeometry-1-hint" class="tab">
+                <p>Use a hash set to detect cycles.</p>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-sm">
+              Click to flip
+            </div>
+          </div>
+          <div class="flashcard-back">
+            <div class="p-5 bg-gray-800 text-white flex justify-between items-center">
+              <h3 class="font-bold text-xl">Happy Number - Solution</h3>
+            </div>
+            <div class="border-b border-gray-600">
+              <div class="flex">
+                <button onclick="showTab('mathgeometry-1-oneliner')" class="px-4 py-2 border-b-2 border-blue-300 text-blue-300">One-liner</button>
+                <button onclick="showTab('mathgeometry-1-threeliner')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">3-liner</button>
+                <button onclick="showTab('mathgeometry-1-mnemonic')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Mnemonic</button>
+                <button onclick="showTab('mathgeometry-1-code')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Code</button>
+              </div>
+            </div>
+            <div class="tab-content">
+              <div id="mathgeometry-1-oneliner" class="tab active">
+                <p>Loop sum of squares of digits until 1 or repeat.</p>
+              </div>
+              <div id="mathgeometry-1-threeliner" class="tab">
+                <p>We square and add each digit.<br>If we reach 1, it's a happy number!<br>If we loop, it's stuck and unhappy.</p>
+              </div>
+              <div id="mathgeometry-1-mnemonic" class="tab">
+                <p>"Sum of digit squares" → `n = sum(int(c)**2 for c in str(n))`<br>"Loop with memory" → `seen = set()`<br>"Stop at 1 or cycle" → `while n != 1 and n not in seen: ...`</p>
+              </div>
+              <div id="mathgeometry-1-code" class="tab">
+                <pre>class Solution:
+    def isHappy(self, n: int) -> bool:
+        slow, fast = n, self.sumOfSquares(n)
+        power = lam = 1
+        
+        while slow != fast:
+            if power == lam:
+                slow = fast
+                power *= 2
+                lam = 0
+            fast = self.sumOfSquares(fast)
+            lam += 1
+        return True if fast == 1 else False
+    
+    def sumOfSquares(self, n: int) -> int:
+        output = 0
+
+        while n:
+            digit = n % 10
+            digit = digit ** 2
+            output += digit
+            n = n // 10
+        return output
+
+# Time Complexity: O(log n)
+# Space Complexity: O(1) - using Floyd's Cycle Finding Algorithm</pre>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-400 text-sm">
+              Click to flip back
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Plus One Flashcard -->
+      <div id="mathgeometry-card-2" class="flashcard hidden">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <div class="p-5 bg-blue-600 text-white flex justify-between items-center">
+              <h3 class="font-bold text-xl">Plus One</h3>
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500">Easy</span>
+            </div>
+            <div class="border-b">
+              <div class="flex">
+                <button onclick="showTab('mathgeometry-2-question')" class="px-4 py-2 border-b-2 border-blue-500 text-blue-600">Question</button>
+                <button onclick="showTab('mathgeometry-2-hint')" class="px-4 py-2 border-b-2 border-transparent">Hint</button>
+              </div>
+            </div>
+            <div class="tab-content">
+              <div id="mathgeometry-2-question" class="tab active">
+                <p>You are given a large integer represented as an integer array digits, where each digits[i] is the ith digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading 0's. Increment the large integer by one and return the resulting array of digits.</p>
+              </div>
+              <div id="mathgeometry-2-hint" class="tab">
+                <p>Handle the carry while adding from the rightmost digit.</p>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-sm">
+              Click to flip
+            </div>
+          </div>
+          <div class="flashcard-back">
+            <div class="p-5 bg-gray-800 text-white flex justify-between items-center">
+              <h3 class="font-bold text-xl">Plus One - Solution</h3>
+            </div>
+            <div class="border-b border-gray-600">
+              <div class="flex">
+                <button onclick="showTab('mathgeometry-2-oneliner')" class="px-4 py-2 border-b-2 border-blue-300 text-blue-300">One-liner</button>
+                <button onclick="showTab('mathgeometry-2-threeliner')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">3-liner</button>
+                <button onclick="showTab('mathgeometry-2-mnemonic')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Mnemonic</button>
+                <button onclick="showTab('mathgeometry-2-code')" class="px-4 py-2 border-b-2 border-transparent text-gray-300">Code</button>
+              </div>
+            </div>
+            <div class="tab-content">
+              <div id="mathgeometry-2-oneliner" class="tab active">
+                <p>Add from the back, handle carry, insert if needed.</p>
+              </div>
+              <div id="mathgeometry-2-threeliner" class="tab">
+                <p>We add 1 to the last digit.<br>If it turns into 10, we carry the 1.<br>If it carries all the way, we add a new digit!</p>
+              </div>
+              <div id="mathgeometry-2-mnemonic" class="tab">
+                <p>"Go backward" → `for i in reversed(range(len(digits)))`<br>"Break early if no carry"<br>"Insert 1 if overflow" → `digits.insert(0, 1)`</p>
+              </div>
+              <div id="mathgeometry-2-code" class="tab">
+                <pre>class Solution:
+    def plusOne(self, digits: List[int]) -> List[int]:
+        one = 1
+        i = 0
+        digits.reverse()
+
+        while one:
+            if i < len(digits):
+                if digits[i] == 9:
+                    digits[i] = 0
+                else:
+                    digits[i] += 1
+                    one = 0
+            else:
+                digits.append(one)
+                one = 0
+            i += 1
+
+        digits.reverse()
+        return digits
+
+# Time Complexity: O(n)
+# Space Complexity: O(1) - in-place modification</pre>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-gray-400 text-sm">
+              Click to flip back
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- More Math & Geometry cards would go here... -->
+    </div>
+    
+    <!-- Other topic pages would go here... -->
   </main>
   
   <footer class="bg-gray-800 text-white p-4 mt-8">
@@ -168,13 +317,112 @@
   </footer>
 
   <script>
-    // Basic script to show an alert is just for demo
-    // In a full implementation, this would navigate to the flashcard view
-    console.log("Script loaded");
+    // Simple direct manipulation functions
+    function showTopics() {
+      document.querySelectorAll('[id$="-page"]').forEach(page => {
+        page.classList.add('hidden');
+      });
+      document.getElementById('topics-page').classList.remove('hidden');
+    }
     
-    // Simple script to check if page loaded correctly
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log("DOM fully loaded");
+    function showTopic(topicId) {
+      document.querySelectorAll('[id$="-page"]').forEach(page => {
+        page.classList.add('hidden');
+      });
+      document.getElementById(topicId + '-page').classList.remove('hidden');
+    }
+    
+    function showTab(tabId) {
+      // Get the parent container of the tab
+      const tabContainer = document.getElementById(tabId).closest('.tab-content');
+      
+      // Hide all tabs in this container
+      tabContainer.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show the selected tab
+      document.getElementById(tabId).classList.add('active');
+      
+      // Update tab buttons (optional)
+      const tabButtons = tabContainer.previousElementSibling.querySelectorAll('button');
+      tabButtons.forEach(button => {
+        if (button.getAttribute('onclick').includes(tabId)) {
+          if (tabId.includes('question') || tabId.includes('oneliner')) {
+            button.classList.add('border-blue-500', 'text-blue-600');
+          } else {
+            button.classList.add('border-blue-300', 'text-blue-300');
+          }
+        } else {
+          if (tabId.includes('question') || tabId.includes('hint')) {
+            button.classList.remove('border-blue-500', 'text-blue-600');
+          } else {
+            button.classList.remove('border-blue-300', 'text-blue-300');
+          }
+        }
+      });
+    }
+    
+    function nextProblem(topicId) {
+      const currentCard = document.querySelector(`#${topicId}-page .flashcard:not(.hidden)`);
+      const currentId = currentCard.id;
+      const currentNumber = parseInt(currentId.split('-')[2]);
+      const nextNumber = currentNumber + 1;
+      
+      // Hide current card
+      currentCard.classList.add('hidden');
+      
+      // Show next card
+      const nextCard = document.getElementById(`${topicId}-card-${nextNumber}`);
+      if (nextCard) {
+        nextCard.classList.remove('hidden');
+        
+        // Update counter
+        const totalProblems = document.querySelectorAll(`#${topicId}-page .flashcard`).length;
+        document.getElementById(`${topicId}-counter`).textContent = `Problem ${nextNumber} of ${totalProblems}`;
+        
+        // Update buttons
+        document.querySelector(`#${topicId}-page button:first-of-type`).disabled = false;
+        if (nextNumber === totalProblems) {
+          document.querySelector(`#${topicId}-page button:last-of-type`).disabled = true;
+        }
+      }
+    }
+    
+    function prevProblem(topicId) {
+      const currentCard = document.querySelector(`#${topicId}-page .flashcard:not(.hidden)`);
+      const currentId = currentCard.id;
+      const currentNumber = parseInt(currentId.split('-')[2]);
+      const prevNumber = currentNumber - 1;
+      
+      // Hide current card
+      currentCard.classList.add('hidden');
+      
+      // Show previous card
+      const prevCard = document.getElementById(`${topicId}-card-${prevNumber}`);
+      if (prevCard) {
+        prevCard.classList.remove('hidden');
+        
+        // Update counter
+        const totalProblems = document.querySelectorAll(`#${topicId}-page .flashcard`).length;
+        document.getElementById(`${topicId}-counter`).textContent = `Problem ${prevNumber} of ${totalProblems}`;
+        
+        // Update buttons
+        document.querySelector(`#${topicId}-page button:last-of-type`).disabled = false;
+        if (prevNumber === 1) {
+          document.querySelector(`#${topicId}-page button:first-of-type`).disabled = true;
+        }
+      }
+    }
+    
+    // Add click event to flip cards
+    document.querySelectorAll('.flashcard').forEach(card => {
+      card.addEventListener('click', function(e) {
+        // Don't flip if clicking on a button
+        if (e.target.tagName === 'BUTTON') return;
+        
+        this.classList.toggle('flipped');
+      });
     });
   </script>
 </body>
