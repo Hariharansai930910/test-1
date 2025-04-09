@@ -474,28 +474,208 @@
           {
             title: 'Binary Search',
             difficulty: 'Easy',
-            question: 'Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.',
+            question: 'Given a sorted array, return the index of target. If not found, return -1.',
             hint: 'Use the binary search algorithm by repeatedly dividing the search interval in half.',
-            oneLiner: 'Use divide and conquer to find the target in a sorted array.',
-            threeLiner: 'We look at the middle element to see if it\'s our target.\nIf not, we eliminate half the array based on if our target is higher or lower.\nWe repeat until we find the target or run out of elements.',
-            mnemonic: 'The "Phone Book Search" - like finding a name in a phone book by dividing pages.',
-            code: `def search(nums, target):
+            oneLiner: 'Use two pointers to repeatedly cut the search range in half.',
+            threeLiner: 'We look in the middle of the list.\nIf it\'s not the number, we search only the left or right part.\nWe do this again and again until we find it or run out.',
+            mnemonic: '"Set range" → low, high = 0, len(nums) - 1\n"Check mid" → mid = (low + high) // 2\n"Narrow search" → if nums[mid] < target: low = mid + 1 else: high = mid - 1',
+            code: `def binarySearch(nums: list[int], target: int) -> int:
     left, right = 0, len(nums) - 1
     
     while left <= right:
         mid = (left + right) // 2
-        
         if nums[mid] == target:
             return mid
-        
-        if nums[mid] < target:
+        elif nums[mid] < target:
             left = mid + 1
         else:
             right = mid - 1
-    
-    return -1  # Target not found
+            
+    return -1
 
-# Time Complexity: O(log n)
+# Time Complexity: O(log N)
+# Space Complexity: O(1)`
+          },
+          {
+            title: 'Search a 2D Matrix',
+            difficulty: 'Medium',
+            question: 'Given an m x n matrix where rows and columns are sorted, search for a target value.',
+            hint: 'Consider treating the 2D matrix as a 1D sorted array.',
+            oneLiner: 'Treat the 2D matrix like a 1D array and use binary search.',
+            threeLiner: 'We pretend the grid is just one long list.\nWe use binary search on that list.\nWe change the middle number back to row and column to check it.',
+            mnemonic: '"Convert index" → row = mid // cols; col = mid % cols\n"Compare mid" → if matrix[row][col] == target: return True\n"Adjust range" → low = mid + 1 or high = mid - 1',
+            code: `def searchMatrix(matrix: list[list[int]], target: int) -> bool:
+    if not matrix or not matrix[0]:
+        return False
+    
+    rows, cols = len(matrix), len(matrix[0])
+    left, right = 0, rows * cols - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        mid_value = matrix[mid // cols][mid % cols]
+        
+        if mid_value == target:
+            return True
+        elif mid_value < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return False
+
+# Time Complexity: O(log(m × n))
+# Space Complexity: O(1)`
+          },
+          {
+            title: 'Koko Eating Bananas',
+            difficulty: 'Medium',
+            question: 'Find the minimum eating speed k such that Koko can eat all bananas within h hours.',
+            hint: 'Try different eating speeds using binary search.',
+            oneLiner: 'Binary search the eating speed to find the minimum speed that finishes on time.',
+            threeLiner: 'We try different eating speeds.\nIf she can finish in time, we try slower ones.\nIf not, we try faster ones.',
+            mnemonic: '"Search range" → low, high = 1, max(piles)\n"Check time" → total_time = sum(ceil(pile / mid))\n"Narrow search" → if time <= h: try slower; else: go faster',
+            code: `import math
+
+def minEatingSpeed(piles: list[int], h: int) -> int:
+    left, right = 1, max(piles)
+    
+    def canFinish(speed):
+        return sum(math.ceil(pile / speed) for pile in piles) <= h
+    
+    while left < right:
+        mid = (left + right) // 2
+        if canFinish(mid):
+            right = mid
+        else:
+            left = mid + 1
+            
+    return left
+
+# Time Complexity: O(N log M) where M is max pile size
+# Space Complexity: O(1)`
+          },
+          {
+            title: 'Find Minimum in Rotated Sorted Array',
+            difficulty: 'Medium',
+            question: 'Find the minimum element in a rotated sorted array.',
+            hint: 'Think about which half the minimum element must be in.',
+            oneLiner: 'Use binary search to find the smallest element by comparing with the rightmost.',
+            threeLiner: 'The smallest number is in the rotated part.\nWe keep checking the middle and comparing to the end.\nWe move left or right depending on which side is sorted.',
+            mnemonic: '"Mid vs right" → if nums[mid] > nums[right]: search right\n"Else search left" → right = mid\n"Result is nums[left]" → return nums[left]',
+            code: `def findMin(nums: list[int]) -> int:
+    left, right = 0, len(nums) - 1
+    
+    while left < right:
+        mid = (left + right) // 2
+        if nums[mid] > nums[right]:  
+            left = mid + 1
+        else:
+            right = mid  
+            
+    return nums[left]
+
+# Time Complexity: O(log N)
+# Space Complexity: O(1)`
+          },
+          {
+            title: 'Search in Rotated Sorted Array',
+            difficulty: 'Medium',
+            question: 'Search for target in a rotated sorted array.',
+            hint: 'First identify which half is sorted, then determine if target lies in that half.',
+            oneLiner: 'Binary search while checking which half is sorted and target range.',
+            threeLiner: 'We split the list in half each time.\nWe check which half is in order.\nThen we pick the side where the target can be.',
+            mnemonic: '"Left sorted?" → if nums[low] <= nums[mid]:\n"Target in left?" → if nums[low] <= target < nums[mid]: high = mid - 1\n"Otherwise search right" → low = mid + 1',
+            code: `def search(nums: list[int], target: int) -> int:
+    left, right = 0, len(nums) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[left] <= nums[mid]:  
+            if nums[left] <= target < nums[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        else:  
+            if nums[mid] < target <= nums[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+                
+    return -1
+
+# Time Complexity: O(log N)
+# Space Complexity: O(1)`
+          },
+          {
+            title: 'Time-Based Key-Value Store',
+            difficulty: 'Medium',
+            question: 'Implement a key-value store that supports setting values with timestamps and retrieving the most recent value before a given timestamp.',
+            hint: 'Store values in a sorted order and use binary search to find the appropriate value.',
+            oneLiner: 'Store timestamped values in a list and binary search for the latest one <= target time.',
+            threeLiner: 'We save every version of a value with the time it was saved.\nWhen asked for a time, we look for the latest version at or before that time.\nWe do this using binary search.',
+            mnemonic: '"Store as list" → store[key].append((timestamp, value))\n"Binary search timestamp" → while low <= high: check mid time\n"Return latest <= timestamp" → res = value if time <= target',
+            code: `from collections import defaultdict
+import bisect
+
+class TimeMap:
+    def __init__(self):
+        self.store = defaultdict(list)
+
+    def set(self, key: str, value: str, timestamp: int) -> None:
+        self.store[key].append((timestamp, value))
+
+    def get(self, key: str, timestamp: int) -> str:
+        if key not in self.store:
+            return ""
+        
+        values = self.store[key]
+        idx = bisect.bisect_right(values, (timestamp, chr(255))) - 1
+        
+        return values[idx][1] if idx >= 0 else ""
+
+# Time Complexity:
+# - set: O(1)
+# - get: O(log N)
+# Space Complexity: O(N)`
+          },
+          {
+            title: 'Median of Two Sorted Arrays',
+            difficulty: 'Hard',
+            question: 'Find the median of two sorted arrays.',
+            hint: 'Think about using binary search to find the correct partition of both arrays.',
+            oneLiner: 'Use binary search to partition both arrays such that left half ≤ right half.',
+            threeLiner: 'We cut both arrays in half in a smart way.\nWe want everything on the left half to be smaller than the right.\nWhen it\'s balanced, we take the middle numbers for the median.',
+            mnemonic: '"Binary on smaller array" → if len(A) > len(B): swap\n"Partition and check" → Aleft <= Bright and Bleft <= Aright\n"Median calc" → if total even: avg of max(left), min(right); else: max(left)',
+            code: `def findMedianSortedArrays(nums1: list[int], nums2: list[int]) -> float:
+    if len(nums1) > len(nums2):
+        nums1, nums2 = nums2, nums1  # Ensure nums1 is the smaller array
+
+    x, y = len(nums1), len(nums2)
+    left, right = 0, x
+
+    while left <= right:
+        partitionX = (left + right) // 2
+        partitionY = (x + y + 1) // 2 - partitionX
+
+        maxX = float('-inf') if partitionX == 0 else nums1[partitionX - 1]
+        minX = float('inf') if partitionX == x else nums1[partitionX]
+        maxY = float('-inf') if partitionY == 0 else nums2[partitionY - 1]
+        minY = float('inf') if partitionY == y else nums2[partitionY]
+
+        if maxX <= minY and maxY <= minX:
+            if (x + y) % 2 == 0:
+                return (max(maxX, maxY) + min(minX, minY)) / 2
+            else:
+                return max(maxX, maxY)
+        elif maxX > minY:
+            right = partitionX - 1
+        else:
+            left = partitionX + 1
+            
+# Time Complexity: O(log min(N, M))
 # Space Complexity: O(1)`
           }
         ],
